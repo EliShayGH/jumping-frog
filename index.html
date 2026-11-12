@@ -1,0 +1,2185 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>הצפרדע הקופצת - משחק מחברת בצבעי מים</title>
+    <!-- גופנים ידידותיים בעברית -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@500;700;800&family=Rubik:wght@500;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --paper-bg: #f6f2e8;
+            --ink: #23262b;
+            --ink-soft: #575d66;
+            --water-deep: #155fa0;
+            --water-mid: #2884d8;
+            --water-light: #6ec1ff;
+            --leaf-green: #58b847;
+            --leaf-dark: #2f7d24;
+            --gold: #f5b700;
+            --gold-light: #fff3b0;
+            --shadow-sketch: 3px 3px 0px #23262b;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #dfd9cc;
+            font-family: 'Rubik', 'Assistant', sans-serif;
+            color: var(--ink);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #game-frame {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            max-width: 1200px;
+            max-height: 800px;
+            background: var(--paper-bg);
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.22);
+        }
+
+        @media (min-width: 1220px) {
+            #game-frame {
+                width: 96vw;
+                height: 92vh;
+                border-radius: 18px;
+                border: 3px solid var(--ink);
+            }
+        }
+
+        /* מרקם נייר צבעי מים עדין */
+        #paper-grain {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.35;
+            background-image: radial-gradient(rgba(35, 38, 43, 0.08) 1px, transparent 0);
+            background-size: 16px 16px;
+            z-index: 1;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* כרטיסים וכפתורים בסגנון סקיצה */
+        .sketch-card {
+            background: rgba(249, 246, 238, 0.96);
+            border: 2.5px solid var(--ink);
+            border-radius: 14px 18px 13px 16px / 16px 13px 18px 14px;
+            box-shadow: var(--shadow-sketch);
+        }
+
+        .sketch-btn {
+            font-family: 'Rubik', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--ink);
+            background: #fffdf8;
+            border: 2.5px solid var(--ink);
+            border-radius: 12px 15px 11px 14px / 14px 11px 15px 12px;
+            padding: 8px 16px;
+            cursor: pointer;
+            box-shadow: var(--shadow-sketch);
+            transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .sketch-btn:hover:not(:disabled) {
+            background: var(--gold-light);
+            transform: translate(-1px, -1px);
+            box-shadow: 4px 4px 0px var(--ink);
+        }
+
+        .sketch-btn:active:not(:disabled), .sketch-btn.pressed {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px var(--ink);
+            background: var(--gold-light);
+        }
+
+        .sketch-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .sketch-btn.gold {
+            background: var(--gold-light);
+        }
+
+        .sketch-btn.green {
+            background: #d8f5d2;
+            border-color: var(--leaf-dark);
+            color: #194d13;
+        }
+
+        /* סרגל עליון (HUD) */
+        #hud {
+            position: absolute;
+            top: 12px;
+            left: 14px;
+            right: 14px;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .hud-cluster {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            pointer-events: auto;
+        }
+
+        .hud-badge {
+            padding: 6px 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+        }
+
+        .hud-badge .lbl {
+            font-size: 0.8rem;
+            color: var(--ink-soft);
+            font-weight: 600;
+        }
+
+        .hud-badge .val {
+            font-size: 1.2rem;
+            font-weight: 900;
+        }
+
+        /* מד כיוון ועוצמה חי */
+        .aim-readout {
+            padding: 6px 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+
+        /* פקדי שליטה על המסך (למגע, טאבלט ועכבר) */
+        #touch-controls {
+            position: absolute;
+            bottom: 14px;
+            left: 14px;
+            right: 14px;
+            z-index: 12;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            pointer-events: none;
+            gap: 10px;
+        }
+
+        .dpad-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            pointer-events: auto;
+            background: rgba(249, 246, 238, 0.85);
+            padding: 8px;
+            border-radius: 16px;
+            border: 2px solid var(--ink);
+            box-shadow: var(--shadow-sketch);
+        }
+
+        .ctrl-key {
+            min-width: 56px;
+            height: 52px;
+            padding: 4px 10px;
+            flex-direction: column;
+            gap: 2px;
+            font-size: 0.82rem;
+            touch-action: none;
+        }
+
+        .ctrl-key span.arrow {
+            font-size: 1.15rem;
+            line-height: 1;
+        }
+
+        #btn-jump-action {
+            pointer-events: auto;
+            height: 64px;
+            padding: 0 28px;
+            font-size: 1.35rem;
+            font-weight: 900;
+            background: linear-gradient(180deg, #ffe680 0%, #f5b700 100%);
+            border-width: 3px;
+            touch-action: none;
+        }
+
+        /* חלונות קופצים */
+        .overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 25;
+            background: rgba(246, 242, 232, 0.76);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            transition: opacity 0.2s ease;
+        }
+
+        .overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .modal {
+            width: 100%;
+            max-width: 500px;
+            padding: 24px 22px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            max-height: 92vh;
+            overflow-y: auto;
+        }
+
+        .modal.store-modal {
+            max-width: 820px;
+            padding: 20px;
+        }
+
+        .modal h1 {
+            font-size: 2.1rem;
+            font-weight: 900;
+            line-height: 1.15;
+        }
+
+        .modal p {
+            font-size: 1.05rem;
+            color: var(--ink-soft);
+            line-height: 1.45;
+        }
+
+        .controls-legend {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            width: 100%;
+            background: #fffdf8;
+            border: 2px solid var(--ink);
+            border-radius: 12px;
+            padding: 10px 12px;
+            font-size: 0.92rem;
+            text-align: right;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .kbd {
+            background: #ebe6d8;
+            border: 1.5px solid var(--ink);
+            border-radius: 6px;
+            padding: 2px 7px;
+            font-weight: 800;
+            font-size: 0.85rem;
+        }
+
+        /* סיכום סיום שלב */
+        .stars-display {
+            font-size: 2.5rem;
+            letter-spacing: 6px;
+            color: var(--gold);
+            text-shadow: 2px 2px 0 var(--ink);
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            width: 100%;
+        }
+
+        .stat-box {
+            background: #fffdf8;
+            border: 2px solid var(--ink);
+            border-radius: 12px;
+            padding: 10px 6px;
+        }
+
+        .stat-box .big {
+            font-size: 1.45rem;
+            font-weight: 900;
+            display: block;
+        }
+
+        .stat-box .small {
+            font-size: 0.82rem;
+            color: var(--ink-soft);
+            font-weight: 600;
+        }
+
+        /* חנות הצפרדעים */
+        .store-top {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            border-bottom: 2px dashed rgba(35, 38, 43, 0.25);
+            padding-bottom: 10px;
+        }
+
+        .store-body {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 230px 1fr;
+            gap: 16px;
+            align-items: start;
+        }
+
+        @media (max-width: 700px) {
+            .store-body {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .frog-preview-card {
+            background: #fffdf8;
+            border: 2px solid var(--ink);
+            border-radius: 14px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #store-preview-canvas {
+            width: 190px;
+            height: 150px;
+            border-radius: 12px;
+            border: 2px dashed rgba(35, 38, 43, 0.3);
+            background: linear-gradient(180deg, #f6f2e8 0%, #f6f2e8 58%, #6ec1ff 62%, #2884d8 100%);
+        }
+
+        .store-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            flex: 1;
+            min-width: 95px;
+        }
+
+        .tab-btn.active {
+            background: var(--gold-light);
+            transform: translateY(-2px);
+        }
+
+        .store-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            max-height: 315px;
+            overflow-y: auto;
+            padding: 4px;
+        }
+
+        .item-card {
+            background: #fffdf8;
+            border: 2px solid var(--ink);
+            border-radius: 12px;
+            padding: 10px 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+            text-align: center;
+        }
+
+        .item-card.active-item {
+            background: #d8f5d2;
+            border-color: var(--leaf-dark);
+        }
+
+        .item-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 2px solid var(--ink);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .item-title {
+            font-weight: 800;
+            font-size: 0.98rem;
+        }
+
+        .item-sub {
+            font-size: 0.78rem;
+            color: var(--ink-soft);
+            line-height: 1.25;
+        }
+
+        /* הודעה קופצת */
+        #toast {
+            position: absolute;
+            top: 76px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-16px);
+            z-index: 40;
+            padding: 8px 20px;
+            background: var(--gold-light);
+            font-weight: 800;
+            font-size: 1.05rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+
+        #toast.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        @media (max-width: 640px) {
+            .hud-badge { padding: 4px 10px; font-size: 0.9rem; }
+            .hud-badge .val { font-size: 1.05rem; }
+            .aim-readout { display: none; }
+            .ctrl-key { min-width: 46px; height: 46px; padding: 2px 6px; font-size: 0.75rem; }
+            #btn-jump-action { height: 54px; padding: 0 20px; font-size: 1.15rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-frame">
+    <div id="paper-grain"></div>
+
+    <!-- סרגל עליון (HUD) -->
+    <div id="hud">
+        <div class="hud-cluster">
+            <div class="sketch-card hud-badge">
+                <span style="font-size:1.35rem;">🪙</span>
+                <div>
+                    <div class="lbl">מטבעות בבנק</div>
+                    <div class="val" id="hud-coins">0</div>
+                </div>
+            </div>
+
+            <div class="sketch-card hud-badge">
+                <span style="font-size:1.35rem;">🚩</span>
+                <div>
+                    <div class="lbl">שלב</div>
+                    <div class="val" id="hud-level">1</div>
+                </div>
+            </div>
+
+            <div class="sketch-card aim-readout" title="זווית ועוצמת הקפיצה">
+                <span>📐 זווית: <strong id="hud-angle">42°</strong></span>
+                <span>⚡ עוצמה: <strong id="hud-power">60%</strong></span>
+            </div>
+        </div>
+
+        <div class="hud-cluster">
+            <button class="sketch-btn gold" id="btn-open-store">🐸 חנות הצפרדעים</button>
+            <button class="sketch-btn" id="btn-reset-level" title="התחל שלב מחדש">🔄 התחל מחדש</button>
+            <button class="sketch-btn" id="btn-sound" title="השתק / הפעל צליל">🔊</button>
+        </div>
+    </div>
+
+    <div id="toast" class="sketch-card">הפריט נרכש!</div>
+
+    <!-- קנבס המשחק -->
+    <canvas id="pond-canvas"></canvas>
+
+    <!-- פקדי שליטה על המסך -->
+    <div id="touch-controls">
+        <div class="dpad-group">
+            <button class="sketch-btn ctrl-key" id="key-right" title="סובב חץ עם כיוון השעון (ימינה)">
+                <span class="arrow">➡️</span>
+                <span>ימינה</span>
+            </button>
+            <button class="sketch-btn ctrl-key" id="key-up" title="הארך חץ - קפיצה חזקה (למעלה)">
+                <span class="arrow">⬆️</span>
+                <span>חזק +</span>
+            </button>
+            <button class="sketch-btn ctrl-key" id="key-down" title="קצר חץ - קפיצה חלשה (למטה)">
+                <span class="arrow">⬇️</span>
+                <span>חלש -</span>
+            </button>
+            <button class="sketch-btn ctrl-key" id="key-left" title="סובב חץ נגד כיוון השעון (שמאלה)">
+                <span class="arrow">⬅️</span>
+                <span>שמאלה</span>
+            </button>
+        </div>
+
+        <button class="sketch-btn" id="btn-jump-action">
+            🦘 קפוץ! (רווח)
+        </button>
+    </div>
+
+    <!-- מסך פתיחה -->
+    <div id="start-overlay" class="overlay">
+        <div class="sketch-card modal">
+            <h1>🐸 הצפרדע הקופצת</h1>
+            <p>
+                עזרו לצפרדע לקפוץ מעלה לעלה מעל המים הכחולים, לאסוף מטבעות נוצצים ולהגיע אל <strong>הדגל האדום</strong>!
+            </p>
+
+            <div class="controls-legend">
+                <div class="legend-item"><span class="kbd">⬆️</span> הארכת החץ (קפיצה רחוקה)</div>
+                <div class="legend-item"><span class="kbd">⬇️</span> קיצור החץ (קפיצה קרובה)</div>
+                <div class="legend-item"><span class="kbd">➡️</span> סיבוב החץ ימינה (נמוך)</div>
+                <div class="legend-item"><span class="kbd">⬅️</span> סיבוב החץ שמאלה (גבוה)</div>
+                <div class="legend-item" style="grid-column: span 2; justify-content: center;">
+                    <span class="kbd">רווח / Space</span> <strong>קפיצה!</strong>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
+                <button class="sketch-btn gold" style="font-size:1.25rem; padding:12px 28px;" id="btn-start-game">
+                    🚀 התחל לשחק!
+                </button>
+                <button class="sketch-btn" id="btn-start-store">
+                    🐸 חנות הצפרדעים
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- מסך סיום שלב -->
+    <div id="win-overlay" class="overlay hidden">
+        <div class="sketch-card modal">
+            <h1 id="win-title">🎉 כל הכבוד! הגעתם לדגל!</h1>
+            <div class="stars-display" id="win-stars">★★★</div>
+            <p id="win-desc">הצפרדע חצתה את הבריכה בהצלחה ואספה את מטבע הדגל הגדול (10)!</p>
+
+            <div class="stats-row">
+                <div class="stat-box">
+                    <span class="big" id="win-level-coins">+10</span>
+                    <span class="small">מטבעות בשלב</span>
+                </div>
+                <div class="stat-box">
+                    <span class="big" id="win-jumps">1</span>
+                    <span class="small">מספר קפיצות</span>
+                </div>
+                <div class="stat-box">
+                    <span class="big" id="win-total-bank">10</span>
+                    <span class="small">סה״כ בבנק</span>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:4px;">
+                <button class="sketch-btn gold" style="font-size:1.15rem; padding:11px 24px;" id="btn-next-level">
+                    ➡️ לשלב הבא
+                </button>
+                <button class="sketch-btn" id="btn-win-store">
+                    🐸 חנות הצפרדעים
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- חנות הצפרדעים (3 לשוניות) -->
+    <div id="store-overlay" class="overlay hidden">
+        <div class="sketch-card modal store-modal">
+            <div class="store-top">
+                <div style="text-align:right;">
+                    <h1 style="font-size:1.65rem;">🐸 חנות ועיצוב הצפרדע</h1>
+                    <p style="font-size:0.92rem;">שדרגו את הצפרדע האפורה לצפרדע נסיך, מלך, צבעים ואביזרים!</p>
+                </div>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <div class="sketch-card hud-badge" style="background:var(--gold-light);">
+                        <span>🪙 בבנק:</span>
+                        <strong id="store-bank-display" style="font-size:1.25rem;">0</strong>
+                    </div>
+                    <button class="sketch-btn" id="btn-close-store">✖️ סגור</button>
+                </div>
+            </div>
+
+            <div class="store-body">
+                <div class="frog-preview-card">
+                    <div style="font-weight:800;">תצוגה מקדימה</div>
+                    <canvas id="store-preview-canvas" width="190" height="150"></canvas>
+                    <div id="preview-caption" style="font-size:0.86rem; color:var(--ink-soft); font-weight:700;">
+                        צפרדע אפורה • אפור סקיצה
+                    </div>
+                </div>
+
+                <div style="width:100%;">
+                    <div class="store-tabs">
+                        <button class="sketch-btn tab-btn active" data-tab="frogs">🐸 צפרדעים</button>
+                        <button class="sketch-btn tab-btn" data-tab="colors">🎨 צבעים</button>
+                        <button class="sketch-btn tab-btn" data-tab="accessories">👑 אביזרים</button>
+                    </div>
+                    <div class="store-grid" id="store-items-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(() => {
+    'use strict';
+
+    // =========================================================================
+    // 1. מערכת צלילים מסונתזת (Web Audio API)
+    // =========================================================================
+    class PondAudio {
+        constructor() {
+            this.ctx = null;
+            this.muted = false;
+        }
+
+        ensure() {
+            if (!this.ctx) {
+                const AC = window.AudioContext || window.webkitAudioContext;
+                if (AC) this.ctx = new AC();
+            }
+            if (this.ctx && this.ctx.state === 'suspended') {
+                this.ctx.resume();
+            }
+        }
+
+        toggleMute() {
+            this.muted = !this.muted;
+            return this.muted;
+        }
+
+        playJump(powerRatio = 0.6) {
+            if (this.muted) return;
+            this.ensure();
+            if (!this.ctx) return;
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            const startF = 180 + powerRatio * 90;
+            const endF = 420 + powerRatio * 220;
+            osc.frequency.setValueAtTime(startF, now);
+            osc.frequency.exponentialRampToValueAtTime(endF, now + 0.18);
+            gain.gain.setValueAtTime(0.001, now);
+            gain.gain.linearRampToValueAtTime(0.14, now + 0.03);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.23);
+        }
+
+        playLand() {
+            if (this.muted) return;
+            this.ensure();
+            if (!this.ctx) return;
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(160, now);
+            osc.frequency.exponentialRampToValueAtTime(95, now + 0.09);
+            gain.gain.setValueAtTime(0.001, now);
+            gain.gain.linearRampToValueAtTime(0.13, now + 0.015);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.12);
+        }
+
+        playSplash() {
+            if (this.muted) return;
+            this.ensure();
+            if (!this.ctx) return;
+            const now = this.ctx.currentTime;
+            const bufferSize = this.ctx.sampleRate * 0.35;
+            const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.32));
+            }
+            const noise = this.ctx.createBufferSource();
+            noise.buffer = buffer;
+
+            const filter = this.ctx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(750, now);
+            filter.frequency.exponentialRampToValueAtTime(220, now + 0.32);
+
+            const gain = this.ctx.createGain();
+            gain.gain.setValueAtTime(0.22, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.34);
+
+            noise.connect(filter);
+            filter.connect(gain);
+            gain.connect(this.ctx.destination);
+            noise.start(now);
+        }
+
+        playCoin(val = 1) {
+            if (this.muted) return;
+            this.ensure();
+            if (!this.ctx) return;
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            const f1 = val >= 10 ? 784 : (val >= 5 ? 680 : 587);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(f1, now);
+            osc.frequency.setValueAtTime(f1 * 1.25, now + 0.06);
+            gain.gain.setValueAtTime(0.001, now);
+            gain.gain.linearRampToValueAtTime(0.14, now + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.25);
+        }
+
+        playWin() {
+            if (this.muted) return;
+            this.ensure();
+            if (!this.ctx) return;
+            const notes = [523.25, 659.25, 783.99, 1046.5];
+            notes.forEach((f, idx) => {
+                const now = this.ctx.currentTime + idx * 0.09;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(f, now);
+                gain.gain.setValueAtTime(0.001, now);
+                gain.gain.linearRampToValueAtTime(0.14, now + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.31);
+            });
+        }
+    }
+
+    // =========================================================================
+    // 2. קטלוג החנות (צפרדעים, צבעים ואביזרים)
+    // =========================================================================
+    const FROGS_CATALOG = [
+        {
+            id: 'starter_gray',
+            name: 'צפרדע אפורה',
+            desc: 'הצפרדע המצוירת ההתחלתית',
+            price: 0,
+            icon: '🐸'
+        },
+        {
+            id: 'male_frog',
+            name: 'צפרדע זכר',
+            desc: 'ספורטיבי וחזק עם עניבת פרפר',
+            price: 30,
+            icon: '🤵'
+        },
+        {
+            id: 'female_frog',
+            name: 'צפרדע נקבה',
+            desc: 'ריסים ארוכים, לחיים ורודות ופרח',
+            price: 45,
+            icon: '🌸'
+        },
+        {
+            id: 'prince_frog',
+            name: 'צפרדע נסיך',
+            desc: 'אבנט מלכותי ונזר זהב עדין',
+            price: 75,
+            icon: '🤴'
+        },
+        {
+            id: 'king_frog',
+            name: 'צפרדע מלך',
+            desc: 'גלימת מלכות, כתר גדול והילת זהב',
+            price: 120,
+            icon: '👑'
+        }
+    ];
+
+    const COLORS_CATALOG = [
+        { id: 'gray', name: 'אפור סקיצה', body: '#b7bcc2', belly: '#e5e7eb', spots: '#787f8a', price: 0 },
+        { id: 'green', name: 'ירוק יער', body: '#5ec94d', belly: '#d9f99d', spots: '#2f8524', price: 25 },
+        { id: 'blue', name: 'כחול מים', body: '#38bdf8', belly: '#e0f2fe', spots: '#0284c7', price: 25 },
+        { id: 'red', name: 'אדום תות', body: '#f87171', belly: '#fee2e2', spots: '#b91c1c', price: 25 },
+        { id: 'purple', name: 'סגול מלכותי', body: '#c084fc', belly: '#f3e8ff', spots: '#7e22ce', price: 25 },
+        { id: 'gold', name: 'זהב נוצץ', body: '#facc15', belly: '#fef9c3', spots: '#b45309', price: 25 }
+    ];
+
+    const ACCESSORIES_CATALOG = [
+        { id: 'none', name: 'ללא אביזר', desc: 'מראה טבעי ונקי', icon: '✨', price: 0 },
+        { id: 'party_hat', name: 'כובע מסיבה', desc: 'כובע צבעוני עם פונפון', icon: '🥳', price: 20 },
+        { id: 'sunglasses', name: 'משקפי שמש', desc: 'משקפיים כהים בסטייל', icon: '🕶️', price: 25 },
+        { id: 'pirate_hat', name: 'כובע פיראט', desc: 'כובע קפטן של יורדי ים', icon: '🏴‍☠️', price: 35 },
+        { id: 'hero_cape', name: 'גלימת גיבור', desc: 'גלימה אדומה מתנופפת', icon: '🦸', price: 40 },
+        { id: 'royal_crown', name: 'כתר מלכות', desc: 'כתר זהב משובץ אבנים', icon: '👑', price: 50 }
+    ];
+
+    // =========================================================================
+    // 3. שמירה מקומית (localStorage)
+    // =========================================================================
+    const STORAGE_KEY = 'jumping_frog_he_save_v1';
+
+    function loadProgress() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) {
+                const data = JSON.parse(raw);
+                return {
+                    coins: Number(data.coins) || 0,
+                    level: Math.max(1, Number(data.level) || 1),
+                    unlockedFrogs: Array.isArray(data.unlockedFrogs) ? data.unlockedFrogs : ['starter_gray'],
+                    unlockedColors: Array.isArray(data.unlockedColors) ? data.unlockedColors : ['gray'],
+                    unlockedAccessories: Array.isArray(data.unlockedAccessories) ? data.unlockedAccessories : ['none'],
+                    equippedFrog: data.equippedFrog || 'starter_gray',
+                    equippedColor: data.equippedColor || 'gray',
+                    equippedAccessory: data.equippedAccessory || 'none'
+                };
+            }
+        } catch (e) {
+            console.warn('Storage read fallback:', e);
+        }
+        return {
+            coins: 0,
+            level: 1,
+            unlockedFrogs: ['starter_gray'],
+            unlockedColors: ['gray'],
+            unlockedAccessories: ['none'],
+            equippedFrog: 'starter_gray',
+            equippedColor: 'gray',
+            equippedAccessory: 'none'
+        };
+    }
+
+    let progress = loadProgress();
+
+    function saveProgress() {
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+        } catch (e) {
+            console.warn('Storage save fallback:', e);
+        }
+    }
+
+    // =========================================================================
+    // 4. הגדרות קנבס, פיזיקה ומצב המשחק
+    // =========================================================================
+    const canvas = document.getElementById('pond-canvas');
+    const ctx = canvas.getContext('2d');
+    const previewCanvas = document.getElementById('store-preview-canvas');
+    const previewCtx = previewCanvas.getContext('2d');
+    const audio = new PondAudio();
+
+    let W = 1000;
+    let H = 680;
+    let dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    // מצבי משחק: 'START' | 'AIMING' | 'JUMPING' | 'SPLASHING' | 'WIN' | 'STORE'
+    let state = 'START';
+    let stateBeforeStore = 'AIMING';
+
+    // קבועי פיזיקה
+    const GRAVITY = 980;
+    const MIN_ANGLE_DEG = 14;  // הכי שטוח ימינה
+    const MAX_ANGLE_DEG = 78;  // הכי תלול שמאלה/למעלה
+    const MIN_POWER = 320;
+    const MAX_POWER = 920;
+
+    // כיוון ועוצמת החץ
+    let aimAngleDeg = 42;
+    let aimPower = 610;
+
+    // מצב קלט רציף (לחיצה ממושכת על החצים)
+    const keysHeld = { left: false, right: false, up: false, down: false };
+
+    // נתוני שלב נוכחי
+    let lilyPads = [];
+    let ripples = [];
+    let splashParticles = [];
+    let floatingPopups = [];
+    let levelCoinsCollected = 0;
+    let jumpsCount = 0;
+    let cameraX = 0;
+    let worldWidth = 1200;
+    let timeElapsed = 0;
+    let lastTime = 0;
+
+    // אובייקט הצפרדע
+    const frog = {
+        x: 130,
+        y: 420,
+        vx: 0,
+        vy: 0,
+        currentPadIndex: 0,
+        safePadIndex: 0,
+        squashX: 1,
+        squashY: 1,
+        splashTimer: 0
+    };
+
+    function resize() {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        W = rect.width;
+        H = rect.height;
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.floor(W * dpr);
+        canvas.height = Math.floor(H * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        if (lilyPads.length > 0 && state !== 'JUMPING') {
+            const pad = lilyPads[frog.currentPadIndex] || lilyPads[0];
+            frog.x = pad.x;
+            frog.y = pad.y - 10;
+        }
+    }
+
+    window.addEventListener('resize', resize);
+    resize();
+
+    // =========================================================================
+    // 5. בניית שלבים דינמית (עלי חבצלת, מטבעות 1 ו-5, ודגל 10)
+    // =========================================================================
+    function getWaterTopY() {
+        return H * 0.43;
+    }
+
+    function buildLevel(levelNum) {
+        lilyPads = [];
+        splashParticles = [];
+        floatingPopups = [];
+        levelCoinsCollected = 0;
+        jumpsCount = 0;
+        cameraX = 0;
+
+        const waterTop = getWaterTopY();
+        const waterBottom = H - 105;
+        const waterSpan = Math.max(180, waterBottom - waterTop);
+
+        // עלה התחלה גדול בצד שמאל
+        const startX = 125;
+        const startY = waterTop + waterSpan * 0.48;
+        lilyPads.push({
+            x: startX,
+            baseX: startX,
+            y: startY,
+            baseY: startY,
+            rx: 56,
+            ry: 28,
+            notchAngle: 0.3,
+            coin: 0,
+            coinCollected: true,
+            isGoal: false,
+            moveAmpY: 0,
+            moveAmpX: 0,
+            moveSpeed: 0,
+            phase: 0
+        });
+
+        // כמות עלי הביניים גדלה בהדרגה עם השלבים
+        const numSteps = Math.min(11, 5 + Math.floor(levelNum * 0.8));
+        let curX = startX;
+        let curY = startY;
+
+        // יוצרים מסלול ראשי + עלי בונוס צדדיים (בדומה לציור הידני!)
+        for (let i = 1; i <= numSteps; i++) {
+            const gapX = Math.min(235, 135 + levelNum * 7 + Math.random() * 45);
+            curX += gapX;
+
+            const normY = 0.16 + ((i * 0.37 + levelNum * 0.19) % 0.68);
+            curY = waterTop + waterSpan * normY;
+
+            const padRx = Math.max(30, 46 - Math.min(14, levelNum * 1.1) + (Math.random() * 8 - 4));
+            const padRy = padRx * 0.52;
+
+            // מטבעות: על חלק מהעלים יש מטבע 1, ועל חלק מטבע 5
+            let coinVal = 0;
+            if (i % 3 === 0) coinVal = 5;
+            else if (i % 2 === 1 || levelNum >= 2) coinVal = 1;
+
+            // בשלבים מתקדמים חלק מהעלים צפים בעדינות במים
+            const canDrift = levelNum >= 3 && i % 2 === 0;
+
+            lilyPads.push({
+                x: curX,
+                baseX: curX,
+                y: curY,
+                baseY: curY,
+                rx: padRx,
+                ry: padRy,
+                notchAngle: (i * 1.3) % (Math.PI * 2),
+                coin: coinVal,
+                coinCollected: coinVal === 0,
+                isGoal: false,
+                moveAmpY: canDrift ? Math.min(26, 10 + levelNum * 1.5) : 0,
+                moveAmpX: levelNum >= 5 && i % 3 === 0 ? 18 : 0,
+                moveSpeed: 1.3 + (levelNum * 0.1),
+                phase: i * 1.1
+            });
+
+            // הוספת עלה בונוס צדדי (למעלה או למטה) עם מטבע 5 מדי פעם, כמו בסקיצה
+            if (i % 2 === 0 && i < numSteps) {
+                const bonusY = curY > waterTop + waterSpan * 0.5
+                    ? waterTop + waterSpan * 0.18
+                    : waterTop + waterSpan * 0.82;
+                const bonusX = curX + 28;
+                lilyPads.push({
+                    x: bonusX,
+                    baseX: bonusX,
+                    y: bonusY,
+                    baseY: bonusY,
+                    rx: 35,
+                    ry: 18,
+                    notchAngle: 2.4,
+                    coin: 5,
+                    coinCollected: false,
+                    isGoal: false,
+                    moveAmpY: 0,
+                    moveAmpX: 0,
+                    moveSpeed: 0,
+                    phase: i
+                });
+            }
+        }
+
+        // עלה המטרה הגדול בצד ימין עם הדגל ומטבע 10!
+        const goalX = curX + Math.min(220, 155 + levelNum * 5);
+        const goalY = waterTop + waterSpan * 0.45;
+        lilyPads.push({
+            x: goalX,
+            baseX: goalX,
+            y: goalY,
+            baseY: goalY,
+            rx: 64,
+            ry: 32,
+            notchAngle: 2.8,
+            coin: 10,
+            coinCollected: false,
+            isGoal: true,
+            moveAmpY: 0,
+            moveAmpX: 0,
+            moveSpeed: 0,
+            phase: 0
+        });
+
+        worldWidth = Math.max(W, goalX + 190);
+
+        // מיקום הצפרדע על עלה ההתחלה
+        frog.currentPadIndex = 0;
+        frog.safePadIndex = 0;
+        frog.x = lilyPads[0].x;
+        frog.y = lilyPads[0].y - 10;
+        frog.vx = 0;
+        frog.vy = 0;
+        frog.squashX = 1;
+        frog.squashY = 1;
+
+        // יצירת אדוות מים ברקע
+        ripples = [];
+        for (let i = 0; i < 16; i++) {
+            ripples.push({
+                x: Math.random() * worldWidth,
+                y: waterTop + 20 + Math.random() * (H - waterTop - 35),
+                w: 30 + Math.random() * 55,
+                speed: 12 + Math.random() * 18,
+                phase: Math.random() * Math.PI * 2
+            });
+        }
+
+        updateHUD();
+    }
+
+    // =========================================================================
+    // 6. ממשק משתמש והודעות
+    // =========================================================================
+    let toastTimeout = null;
+    function showToast(text) {
+        const el = document.getElementById('toast');
+        el.textContent = text;
+        el.classList.add('visible');
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => el.classList.remove('visible'), 2000);
+    }
+
+    function updateHUD() {
+        document.getElementById('hud-coins').textContent = progress.coins;
+        document.getElementById('hud-level').textContent = progress.level;
+        document.getElementById('hud-angle').textContent = `${Math.round(aimAngleDeg)}°`;
+        const powerPct = Math.round(((aimPower - MIN_POWER) / (MAX_POWER - MIN_POWER)) * 100);
+        document.getElementById('hud-power').textContent = `${powerPct}%`;
+    }
+
+    function performJump() {
+        if (state === 'START') {
+            document.getElementById('start-overlay').classList.add('hidden');
+            state = 'AIMING';
+        }
+        if (state !== 'AIMING') return;
+
+        audio.ensure();
+        const rad = (aimAngleDeg * Math.PI) / 180;
+        frog.vx = Math.cos(rad) * aimPower;
+        frog.vy = -Math.sin(rad) * aimPower;
+        frog.squashX = 0.78;
+        frog.squashY = 1.28;
+        state = 'JUMPING';
+        jumpsCount++;
+
+        const powerRatio = (aimPower - MIN_POWER) / (MAX_POWER - MIN_POWER);
+        audio.playJump(powerRatio);
+    }
+
+    function handleLevelWin() {
+        state = 'WIN';
+        audio.playWin();
+
+        const completedLevel = progress.level;
+        progress.coins += levelCoinsCollected;
+        progress.level += 1;
+        saveProgress();
+        updateHUD();
+
+        const optimalJumps = Math.max(3, Math.floor(lilyPads.length * 0.7));
+        let stars = '★☆☆';
+        if (jumpsCount <= optimalJumps + 1) stars = '★★★';
+        else if (jumpsCount <= optimalJumps + 4) stars = '★★☆';
+
+        document.getElementById('win-title').textContent = `🎉 שלב ${completedLevel} הושלם!`;
+        document.getElementById('win-stars').textContent = stars;
+        document.getElementById('win-level-coins').textContent = `+${levelCoinsCollected}`;
+        document.getElementById('win-jumps').textContent = jumpsCount;
+        document.getElementById('win-total-bank').textContent = progress.coins;
+
+        document.getElementById('win-overlay').classList.remove('hidden');
+    }
+
+    // =========================================================================
+    // 7. חנות ועיצוב הצפרדע (3 לשוניות + תצוגה מקדימה)
+    // =========================================================================
+    let currentTab = 'frogs';
+
+    function openStore() {
+        if (state !== 'STORE') stateBeforeStore = state;
+        state = 'STORE';
+        document.getElementById('start-overlay').classList.add('hidden');
+        document.getElementById('win-overlay').classList.add('hidden');
+        document.getElementById('store-overlay').classList.remove('hidden');
+        renderStore();
+    }
+
+    function closeStore() {
+        document.getElementById('store-overlay').classList.add('hidden');
+        if (stateBeforeStore === 'WIN') {
+            state = 'WIN';
+            document.getElementById('win-overlay').classList.remove('hidden');
+        } else if (stateBeforeStore === 'START') {
+            state = 'START';
+            document.getElementById('start-overlay').classList.remove('hidden');
+        } else {
+            state = 'AIMING';
+        }
+    }
+
+    function renderStore() {
+        document.getElementById('store-bank-display').textContent = progress.coins;
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.tab === currentTab);
+        });
+
+        const fSpec = FROGS_CATALOG.find(f => f.id === progress.equippedFrog) || FROGS_CATALOG[0];
+        const cSpec = COLORS_CATALOG.find(c => c.id === progress.equippedColor) || COLORS_CATALOG[0];
+        const aSpec = ACCESSORIES_CATALOG.find(a => a.id === progress.equippedAccessory) || ACCESSORIES_CATALOG[0];
+        document.getElementById('preview-caption').textContent =
+            `${fSpec.name} • ${cSpec.name}` + (aSpec.id !== 'none' ? ` • ${aSpec.name}` : '');
+
+        const container = document.getElementById('store-items-container');
+        container.innerHTML = '';
+
+        if (currentTab === 'frogs') {
+            FROGS_CATALOG.forEach(item => {
+                const owned = progress.unlockedFrogs.includes(item.id);
+                const equipped = progress.equippedFrog === item.id;
+                container.appendChild(buildItemCard({
+                    iconHtml: `<div class="item-icon" style="background:#fff3b0;">${item.icon}</div>`,
+                    title: item.name,
+                    sub: item.desc,
+                    owned,
+                    equipped,
+                    price: item.price,
+                    action: () => {
+                        if (owned) {
+                            progress.equippedFrog = item.id;
+                            saveProgress();
+                            audio.playLand();
+                            renderStore();
+                        } else if (progress.coins >= item.price) {
+                            progress.coins -= item.price;
+                            progress.unlockedFrogs.push(item.id);
+                            progress.equippedFrog = item.id;
+                            saveProgress();
+                            updateHUD();
+                            audio.playCoin(5);
+                            showToast(`תתחדשו על ${item.name}!`);
+                            renderStore();
+                        }
+                    }
+                }));
+            });
+        } else if (currentTab === 'colors') {
+            COLORS_CATALOG.forEach(item => {
+                const owned = progress.unlockedColors.includes(item.id);
+                const equipped = progress.equippedColor === item.id;
+                container.appendChild(buildItemCard({
+                    iconHtml: `<div class="item-icon" style="background:${item.body};">🎨</div>`,
+                    title: item.name,
+                    sub: 'צבע מיוחד לצפרדע',
+                    owned,
+                    equipped,
+                    price: item.price,
+                    action: () => {
+                        if (owned) {
+                            progress.equippedColor = item.id;
+                            saveProgress();
+                            audio.playLand();
+                            renderStore();
+                        } else if (progress.coins >= item.price) {
+                            progress.coins -= item.price;
+                            progress.unlockedColors.push(item.id);
+                            progress.equippedColor = item.id;
+                            saveProgress();
+                            updateHUD();
+                            audio.playCoin(5);
+                            showToast(`הצפרדע נצבעה ב${item.name}!`);
+                            renderStore();
+                        }
+                    }
+                }));
+            });
+        } else if (currentTab === 'accessories') {
+            ACCESSORIES_CATALOG.forEach(item => {
+                const owned = progress.unlockedAccessories.includes(item.id);
+                const equipped = progress.equippedAccessory === item.id;
+                container.appendChild(buildItemCard({
+                    iconHtml: `<div class="item-icon" style="background:#e0f2fe;">${item.icon}</div>`,
+                    title: item.name,
+                    sub: item.desc,
+                    owned,
+                    equipped,
+                    price: item.price,
+                    action: () => {
+                        if (owned) {
+                            progress.equippedAccessory = item.id;
+                            saveProgress();
+                            audio.playLand();
+                            renderStore();
+                        } else if (progress.coins >= item.price) {
+                            progress.coins -= item.price;
+                            progress.unlockedAccessories.push(item.id);
+                            progress.equippedAccessory = item.id;
+                            saveProgress();
+                            updateHUD();
+                            audio.playCoin(5);
+                            showToast(`האביזר "${item.name}" נרכש!`);
+                            renderStore();
+                        }
+                    }
+                }));
+            });
+        }
+    }
+
+    function buildItemCard({ iconHtml, title, sub, owned, equipped, price, action }) {
+        const div = document.createElement('div');
+        div.className = 'item-card' + (equipped ? ' active-item' : '');
+
+        let btnText = `🪙 ${price}`;
+        let btnClass = 'sketch-btn';
+        let disabled = false;
+
+        if (equipped) {
+            btnText = '✅ בשימוש';
+            btnClass += ' green';
+        } else if (owned) {
+            btnText = 'בחר';
+        } else if (progress.coins < price) {
+            disabled = true;
+        }
+
+        div.innerHTML = `
+            ${iconHtml}
+            <div class="item-title">${title}</div>
+            <div class="item-sub">${sub}</div>
+            <button class="${btnClass}" style="width:100%; padding:5px 8px; font-size:0.88rem;" ${disabled ? 'disabled' : ''}>
+                ${btnText}
+            </button>
+        `;
+        div.querySelector('button').addEventListener('click', action);
+        return div;
+    }
+
+    // =========================================================================
+    // 8. קלט מקלדת וכפתורי מגע
+    // =========================================================================
+    function setKey(dir, active) {
+        if (active && state === 'START') {
+            document.getElementById('start-overlay').classList.add('hidden');
+            state = 'AIMING';
+        }
+        keysHeld[dir] = active;
+        const btn = document.getElementById(`key-${dir}`);
+        if (btn) btn.classList.toggle('pressed', active);
+    }
+
+    window.addEventListener('keydown', (e) => {
+        if (e.code === 'ArrowRight' || e.code === 'KeyD') {
+            e.preventDefault();
+            setKey('right', true);
+        } else if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
+            e.preventDefault();
+            setKey('left', true);
+        } else if (e.code === 'ArrowUp' || e.code === 'KeyW') {
+            e.preventDefault();
+            setKey('up', true);
+        } else if (e.code === 'ArrowDown' || e.code === 'KeyS') {
+            e.preventDefault();
+            setKey('down', true);
+        } else if (e.code === 'Space' || e.code === 'Enter') {
+            e.preventDefault();
+            if (state === 'WIN') {
+                document.getElementById('win-overlay').classList.add('hidden');
+                buildLevel(progress.level);
+                state = 'AIMING';
+            } else if (state !== 'STORE') {
+                performJump();
+            }
+        } else if (e.code === 'Escape' && state === 'STORE') {
+            closeStore();
+        }
+    });
+
+    window.addEventListener('keyup', (e) => {
+        if (e.code === 'ArrowRight' || e.code === 'KeyD') setKey('right', false);
+        else if (e.code === 'ArrowLeft' || e.code === 'KeyA') setKey('left', false);
+        else if (e.code === 'ArrowUp' || e.code === 'KeyW') setKey('up', false);
+        else if (e.code === 'ArrowDown' || e.code === 'KeyS') setKey('down', false);
+    });
+
+    window.addEventListener('blur', () => {
+        ['left', 'right', 'up', 'down'].forEach(k => setKey(k, false));
+    });
+
+    ['left', 'right', 'up', 'down'].forEach(dir => {
+        const el = document.getElementById(`key-${dir}`);
+        if (!el) return;
+        el.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            el.setPointerCapture(e.pointerId);
+            setKey(dir, true);
+        });
+        const upFn = (e) => {
+            e.preventDefault();
+            setKey(dir, false);
+        };
+        el.addEventListener('pointerup', upFn);
+        el.addEventListener('pointercancel', upFn);
+    });
+
+    document.getElementById('btn-jump-action').addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        performJump();
+    });
+
+    document.getElementById('btn-start-game').addEventListener('click', () => {
+        audio.ensure();
+        document.getElementById('start-overlay').classList.add('hidden');
+        state = 'AIMING';
+    });
+
+    document.getElementById('btn-next-level').addEventListener('click', () => {
+        document.getElementById('win-overlay').classList.add('hidden');
+        buildLevel(progress.level);
+        state = 'AIMING';
+    });
+
+    document.getElementById('btn-reset-level').addEventListener('click', () => {
+        buildLevel(progress.level);
+        if (state !== 'START') state = 'AIMING';
+    });
+
+    document.getElementById('btn-open-store').addEventListener('click', openStore);
+    document.getElementById('btn-start-store').addEventListener('click', openStore);
+    document.getElementById('btn-win-store').addEventListener('click', openStore);
+    document.getElementById('btn-close-store').addEventListener('click', closeStore);
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            currentTab = btn.dataset.tab;
+            renderStore();
+        });
+    });
+
+    document.getElementById('btn-sound').addEventListener('click', () => {
+        const muted = audio.toggleMute();
+        document.getElementById('btn-sound').textContent = muted ? '🔇' : '🔊';
+    });
+
+    // =========================================================================
+    // 9. עדכון פיזיקה ואנימציה
+    // =========================================================================
+    function update(dt) {
+        timeElapsed += dt;
+
+        // עדכון תנועת עלי חבצלת צפים
+        lilyPads.forEach(pad => {
+            if (pad.moveAmpY > 0) {
+                pad.y = pad.baseY + Math.sin(timeElapsed * pad.moveSpeed + pad.phase) * pad.moveAmpY;
+            }
+            if (pad.moveAmpX > 0) {
+                pad.x = pad.baseX + Math.cos(timeElapsed * pad.moveSpeed + pad.phase) * pad.moveAmpX;
+            }
+        });
+
+        // אדוות מים
+        ripples.forEach(r => {
+            r.x -= r.speed * dt;
+            if (r.x + r.w < 0) r.x = worldWidth + 40;
+        });
+
+        // התאוששות מתיחה/כיווץ של הצפרדע
+        frog.squashX += (1 - frog.squashX) * Math.min(1, dt * 12);
+        frog.squashY += (1 - frog.squashY) * Math.min(1, dt * 12);
+
+        if (state === 'AIMING') {
+            // הצמדת הצפרדע לעלה הנוכחי (גם אם הוא צף!)
+            const curPad = lilyPads[frog.currentPadIndex] || lilyPads[0];
+            frog.x = curPad.x;
+            frog.y = curPad.y - 10;
+
+            // שליטה בזווית: ימינה = עם כיוון השעון (הורדת זווית), שמאלה = נגד השעון (העלאת זווית)
+            const rotSpeed = 62; // מעלות לשנייה
+            if (keysHeld.right) aimAngleDeg = Math.max(MIN_ANGLE_DEG, aimAngleDeg - rotSpeed * dt);
+            if (keysHeld.left) aimAngleDeg = Math.min(MAX_ANGLE_DEG, aimAngleDeg + rotSpeed * dt);
+
+            // שליטה בעוצמה (אורך החץ): למעלה = חזק, למטה = חלש
+            const powSpeed = 420;
+            if (keysHeld.up) aimPower = Math.min(MAX_POWER, aimPower + powSpeed * dt);
+            if (keysHeld.down) aimPower = Math.max(MIN_POWER, aimPower - powSpeed * dt);
+
+            updateHUD();
+        } else if (state === 'JUMPING') {
+            const prevY = frog.y;
+            frog.x += frog.vx * dt;
+            frog.vy += GRAVITY * dt;
+            frog.y += frog.vy * dt;
+
+            // בדיקת נחיתה על עלי חבצלת כשהצפרדע יורדת למטה (vy > 0)
+            if (frog.vy > 0) {
+                for (let i = 0; i < lilyPads.length; i++) {
+                    const pad = lilyPads[i];
+                    const padSurfaceY = pad.y - 8;
+                    const dx = Math.abs(frog.x - pad.x);
+                    const withinX = dx <= pad.rx * 0.92;
+                    const crossedY = prevY <= padSurfaceY + 12 && frog.y >= padSurfaceY - 4 && frog.y <= padSurfaceY + 24;
+
+                    if (withinX && crossedY) {
+                        frog.x = pad.x;
+                        frog.y = pad.y - 10;
+                        frog.vx = 0;
+                        frog.vy = 0;
+                        frog.currentPadIndex = i;
+                        frog.safePadIndex = i;
+                        frog.squashX = 1.32;
+                        frog.squashY = 0.72;
+                        audio.playLand();
+
+                        // איסוף מטבע אם קיים על העלה
+                        if (!pad.coinCollected && pad.coin > 0) {
+                            pad.coinCollected = true;
+                            levelCoinsCollected += pad.coin;
+                            audio.playCoin(pad.coin);
+                            floatingPopups.push({
+                                x: pad.x,
+                                y: pad.y - 34,
+                                text: `+${pad.coin} 🪙`,
+                                life: 0.95
+                            });
+                        }
+
+                        if (pad.isGoal) {
+                            handleLevelWin();
+                        } else {
+                            state = 'AIMING';
+                        }
+                        break;
+                    }
+                }
+            }
+
+            // בדיקת נפילה למים
+            if (state === 'JUMPING' && frog.y > getWaterTopY() + 25) {
+                // אם הצפרדע עברה מתחת לגובה של העלים הנמוכים או מתחת לאמצע המים
+                const lowestPadY = Math.max(...lilyPads.map(p => p.y));
+                if (frog.y > lowestPadY + 18 || frog.x > worldWidth + 40 || frog.x < -40) {
+                    triggerSplash();
+                }
+            }
+        } else if (state === 'SPLASHING') {
+            frog.splashTimer -= dt;
+            if (frog.splashTimer <= 0) {
+                const safePad = lilyPads[frog.safePadIndex] || lilyPads[0];
+                frog.currentPadIndex = frog.safePadIndex;
+                frog.x = safePad.x;
+                frog.y = safePad.y - 10;
+                frog.vx = 0;
+                frog.vy = 0;
+                frog.squashX = 1.2;
+                frog.squashY = 0.8;
+                state = 'AIMING';
+            }
+        }
+
+        // עדכון חלקיקי מים והודעות ניקוד
+        for (let i = splashParticles.length - 1; i >= 0; i--) {
+            const p = splashParticles[i];
+            p.x += p.vx * dt;
+            p.vy += 520 * dt;
+            p.y += p.vy * dt;
+            p.life -= dt;
+            if (p.life <= 0) splashParticles.splice(i, 1);
+        }
+
+        for (let i = floatingPopups.length - 1; i >= 0; i--) {
+            const fp = floatingPopups[i];
+            fp.y -= 36 * dt;
+            fp.life -= dt;
+            if (fp.life <= 0) floatingPopups.splice(i, 1);
+        }
+
+        // מעקב מצלמה חלק בשלבים רחבים
+        const maxCam = Math.max(0, worldWidth - W);
+        const targetCam = Math.max(0, Math.min(maxCam, frog.x - W * 0.28));
+        cameraX += (targetCam - cameraX) * Math.min(1, dt * 6);
+    }
+
+    function triggerSplash() {
+        state = 'SPLASHING';
+        frog.splashTimer = 0.65;
+        audio.playSplash();
+
+        for (let i = 0; i < 18; i++) {
+            const ang = -Math.PI * (0.15 + Math.random() * 0.7);
+            const spd = 110 + Math.random() * 190;
+            splashParticles.push({
+                x: frog.x,
+                y: frog.y,
+                vx: Math.cos(ang) * spd,
+                vy: Math.sin(ang) * spd,
+                r: 3 + Math.random() * 4,
+                life: 0.55 + Math.random() * 0.25
+            });
+        }
+    }
+
+    // =========================================================================
+    // 10. ציור העולם בצבעי מים ועט סקיצה
+    // =========================================================================
+    function drawWatercolorPond() {
+        ctx.clearRect(0, 0, W, H);
+
+        const waterTop = getWaterTopY();
+
+        // שכבות צבעי מים כחולים רכים עם גלים טבעיים
+        const grad = ctx.createLinearGradient(0, waterTop - 15, 0, H);
+        grad.addColorStop(0, '#7cc6ff');
+        grad.addColorStop(0.28, '#2d8be0');
+        grad.addColorStop(0.75, '#1965ad');
+        grad.addColorStop(1, '#104982');
+
+        ctx.save();
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.moveTo(0, waterTop);
+        for (let x = 0; x <= W + 40; x += 40) {
+            const waveY = waterTop + Math.sin((x + cameraX) * 0.015 + timeElapsed * 1.4) * 6;
+            ctx.lineTo(x, waveY);
+        }
+        ctx.lineTo(W, H);
+        ctx.lineTo(0, H);
+        ctx.closePath();
+        ctx.fill();
+
+        // הילה בהירה בקו שפת המים
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+        ctx.lineWidth = 4;
+        ctx.stroke();
+        ctx.restore();
+
+        // אדוות מים עדינות
+        ctx.save();
+        ctx.translate(-cameraX, 0);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ripples.forEach(r => {
+            ctx.beginPath();
+            ctx.moveTo(r.x, r.y);
+            ctx.quadraticCurveTo(r.x + r.w * 0.5, r.y - 3, r.x + r.w, r.y);
+            ctx.stroke();
+        });
+
+        // שלט עץ "התחל" בפינה השמאלית התחתונה (בהשראת הציור)
+        drawStartWoodenSign(72, H - 56);
+        ctx.restore();
+    }
+
+    function drawStartWoodenSign(x, y) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.strokeStyle = '#23262b';
+        ctx.lineWidth = 2.2;
+
+        // עמוד עץ
+        ctx.fillStyle = '#a47148';
+        ctx.fillRect(-4, 0, 8, 36);
+        ctx.strokeRect(-4, 0, 8, 36);
+
+        // לוח השלט
+        ctx.rotate(-0.06);
+        ctx.fillStyle = '#e6ccb2';
+        ctx.beginPath();
+        ctx.roundRect(-36, -24, 72, 28, 5);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#23262b';
+        ctx.font = '800 15px "Rubik", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('התחל', 0, -10);
+        ctx.restore();
+    }
+
+    function drawLilyPad(pad) {
+        ctx.save();
+        ctx.translate(pad.x, pad.y);
+
+        // צל רך במים מתחת לעלה
+        ctx.fillStyle = 'rgba(10, 42, 78, 0.35)';
+        ctx.beginPath();
+        ctx.ellipse(3, 8, pad.rx * 1.02, pad.ry * 0.95, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // גוף עלה החבצלת הירוק עם חריץ V
+        const leafGrad = ctx.createRadialGradient(-pad.rx * 0.25, -pad.ry * 0.25, 4, 0, 0, pad.rx);
+        leafGrad.addColorStop(0, '#8ce374');
+        leafGrad.addColorStop(0.65, '#4eb33d');
+        leafGrad.addColorStop(1, '#2f7d24');
+
+        ctx.fillStyle = leafGrad;
+        ctx.strokeStyle = '#23262b';
+        ctx.lineWidth = 2.3;
+
+        const startA = pad.notchAngle + 0.26;
+        const endA = pad.notchAngle + Math.PI * 2 - 0.26;
+
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.ellipse(0, 0, pad.rx, pad.ry, 0, startA, endA);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // עורקי עלה עדינים
+        ctx.strokeStyle = 'rgba(26, 77, 20, 0.45)';
+        ctx.lineWidth = 1.3;
+        for (let k = 0; k < 4; k++) {
+            const a = startA + ((endA - startA) * (k + 0.5)) / 4;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(Math.cos(a) * pad.rx * 0.72, Math.sin(a) * pad.ry * 0.72);
+            ctx.stroke();
+        }
+
+        // אם זה עלה המטרה — מציירים את הדגל האדום-לבן!
+        if (pad.isGoal) {
+            drawGoalFlag(14, -4);
+        }
+
+        // ציור מטבע (1, 5, או 10 ליד הדגל)
+        if (!pad.coinCollected && pad.coin > 0) {
+            const coinX = pad.isGoal ? -22 : 0;
+            const coinY = (pad.isGoal ? -18 : -22) + Math.sin(timeElapsed * 4 + pad.phase) * 3;
+            drawCoinToken(coinX, coinY, pad.coin);
+        }
+
+        ctx.restore();
+    }
+
+    function drawGoalFlag(fx, fy) {
+        ctx.save();
+        ctx.translate(fx, fy);
+        ctx.strokeStyle = '#23262b';
+        ctx.lineWidth = 2.5;
+        ctx.lineCap = 'round';
+
+        // תורן הדגל
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, -86);
+        ctx.stroke();
+
+        // בד הדגל מתנופף ברוח (אדום-לבן-אדום כמו בציור!)
+        const wave = Math.sin(timeElapsed * 5) * 3;
+        ctx.fillStyle = '#e63946';
+        ctx.beginPath();
+        ctx.moveTo(0, -84);
+        ctx.quadraticCurveTo(22, -88 + wave, 44, -81);
+        ctx.lineTo(44, -55);
+        ctx.quadraticCurveTo(22, -62 + wave, 0, -58);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // פס לבן במרכז הדגל
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.moveTo(15, -85 + wave * 0.5);
+        ctx.lineTo(28, -84 + wave * 0.8);
+        ctx.lineTo(28, -58 + wave * 0.8);
+        ctx.lineTo(15, -59 + wave * 0.5);
+        ctx.closePath();
+        ctx.fill();
+
+        // מסגרת חיצונית מחודשת לדגל
+        ctx.beginPath();
+        ctx.moveTo(0, -84);
+        ctx.quadraticCurveTo(22, -88 + wave, 44, -81);
+        ctx.lineTo(44, -55);
+        ctx.quadraticCurveTo(22, -62 + wave, 0, -58);
+        ctx.stroke();
+
+        ctx.restore();
+    }
+
+    function drawCoinToken(cx, cy, val) {
+        ctx.save();
+        ctx.translate(cx, cy);
+        const r = val >= 10 ? 18 : (val >= 5 ? 16 : 14);
+
+        ctx.fillStyle = val >= 10 ? '#ffd60a' : (val >= 5 ? '#ffe14d' : '#fff08a');
+        ctx.strokeStyle = '#23262b';
+        ctx.lineWidth = 2.2;
+
+        ctx.beginPath();
+        ctx.arc(0, 0, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.strokeStyle = 'rgba(35, 38, 43, 0.35)';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(0, 0, r - 3.5, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.fillStyle = '#23262b';
+        ctx.font = `900 ${val >= 10 ? 14 : 13}px "Rubik", sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(String(val), 0, 1);
+        ctx.restore();
+    }
+
+    /**
+     * חץ הכיוון והעוצמה הצבעוני + מד זווית + נקודות מסלול צפוי
+     */
+    function drawAimingArrow() {
+        if (state !== 'AIMING') return;
+
+        const rad = (aimAngleDeg * Math.PI) / 180;
+        const powerRatio = (aimPower - MIN_POWER) / (MAX_POWER - MIN_POWER);
+        const arrowLen = 58 + powerRatio * 95;
+
+        const startX = frog.x + 18;
+        const startY = frog.y - 14;
+        const endX = startX + Math.cos(rad) * arrowLen;
+        const endY = startY - Math.sin(rad) * arrowLen;
+
+        // 1. נקודות מסלול פרבולי צפוי (Trajectory Preview)
+        ctx.save();
+        const vx = Math.cos(rad) * aimPower;
+        const vy = -Math.sin(rad) * aimPower;
+        for (let step = 1; step <= 8; step++) {
+            const t = step * 0.085;
+            const px = frog.x + vx * t;
+            const py = (frog.y - 10) + vy * t + 0.5 * GRAVITY * t * t;
+            ctx.fillStyle = `rgba(35, 38, 43, ${0.55 - step * 0.055})`;
+            ctx.beginPath();
+            ctx.arc(px, py, Math.max(2, 4.5 - step * 0.3), 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.restore();
+
+        // 2. קו בסיס וקשת זווית (כמו בציור עם המספר 40°)
+        ctx.save();
+        ctx.strokeStyle = 'rgba(35, 38, 43, 0.55)';
+        ctx.setLineDash([4, 4]);
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(startX + 58, startY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.beginPath();
+        ctx.arc(startX, startY, 34, -rad, 0);
+        ctx.stroke();
+
+        ctx.fillStyle = '#23262b';
+        ctx.font = '800 13px "Rubik", sans-serif';
+        ctx.fillText(`${Math.round(aimAngleDeg)}°`, startX + 40, startY - 8);
+        ctx.restore();
+
+        // 3. חץ צבעוני עבה עם מסגרת עט שחורה
+        ctx.save();
+        ctx.translate(startX, startY);
+        ctx.rotate(-rad);
+
+        const grad = ctx.createLinearGradient(0, 0, arrowLen, 0);
+        grad.addColorStop(0, '#ff5964');
+        grad.addColorStop(0.5, '#ffca3a');
+        grad.addColorStop(1, '#8ac926');
+
+        ctx.fillStyle = grad;
+        ctx.strokeStyle = '#23262b';
+        ctx.lineWidth = 2.3;
+        ctx.lineJoin = 'round';
+
+        const shaftH = 5.5;
+        const headLen = 18;
+        const headW = 13;
+        const bodyLen = Math.max(20, arrowLen - headLen);
+
+        ctx.beginPath();
+        ctx.moveTo(0, -shaftH);
+        ctx.lineTo(bodyLen, -shaftH);
+        ctx.lineTo(bodyLen, -headW);
+        ctx.lineTo(arrowLen, 0);
+        ctx.lineTo(bodyLen, headW);
+        ctx.lineTo(bodyLen, shaftH);
+        ctx.lineTo(0, shaftH);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.restore();
+    }
+
+    /**
+     * ציור הצפרדע המצוירת (תומך בכל 5 סוגי הצפרדעים, הצבעים והאביזרים)
+     */
+    function drawFrogCharacter(targetCtx, x, y, sx, sy, scale = 1) {
+        if (state === 'SPLASHING' && targetCtx === ctx) return;
+
+        const frogType = FROGS_CATALOG.find(f => f.id === progress.equippedFrog) || FROGS_CATALOG[0];
+        const colorSpec = COLORS_CATALOG.find(c => c.id === progress.equippedColor) || COLORS_CATALOG[0];
+        const accId = progress.equippedAccessory || 'none';
+
+        const breathe = Math.sin(timeElapsed * 4) * 1.2;
+
+        targetCtx.save();
+        targetCtx.translate(x, y + breathe);
+        targetCtx.scale(scale * sx, scale * sy);
+        targetCtx.lineCap = 'round';
+        targetCtx.lineJoin = 'round';
+
+        // הילת זהב לצפרדע מלך
+        if (frogType.id === 'king_frog') {
+            targetCtx.fillStyle = 'rgba(250, 204, 21, 0.28)';
+            targetCtx.beginPath();
+            targetCtx.arc(0, -6, 34, 0, Math.PI * 2);
+            targetCtx.fill();
+        }
+
+        // גלימת גיבור-על או גלימת מלך מאחורי הגוף
+        if (accId === 'hero_cape' || frogType.id === 'king_frog') {
+            targetCtx.fillStyle = frogType.id === 'king_frog' ? '#9b2226' : '#e63946';
+            targetCtx.strokeStyle = '#23262b';
+            targetCtx.lineWidth = 2;
+            targetCtx.beginPath();
+            targetCtx.moveTo(-6, -12);
+            targetCtx.quadraticCurveTo(-24, -14, -34, 4);
+            targetCtx.lineTo(-14, 8);
+            targetCtx.closePath();
+            targetCtx.fill();
+            targetCtx.stroke();
+        }
+
+        // רגל אחורית מקופלת (בסגנון הצפרדע האפורה מהסקיצה)
+        targetCtx.fillStyle = colorSpec.body;
+        targetCtx.strokeStyle = '#23262b';
+        targetCtx.lineWidth = 2.2;
+        targetCtx.beginPath();
+        targetCtx.ellipse(-11, 2, 11, 7, -0.45, 0, Math.PI * 2);
+        targetCtx.fill();
+        targetCtx.stroke();
+
+        // כף רגל אחורית
+        targetCtx.beginPath();
+        targetCtx.moveTo(-16, 8);
+        targetCtx.lineTo(-4, 9);
+        targetCtx.lineTo(-8, 5);
+        targetCtx.stroke();
+
+        // גוף ראשי
+        targetCtx.fillStyle = colorSpec.body;
+        targetCtx.beginPath();
+        targetCtx.ellipse(0, -4, 19, 14, -0.18, 0, Math.PI * 2);
+        targetCtx.fill();
+        targetCtx.stroke();
+
+        // בטן בהירה
+        targetCtx.fillStyle = colorSpec.belly;
+        targetCtx.beginPath();
+        targetCtx.ellipse(6, -1, 11, 9, -0.2, -0.8, 1.6);
+        targetCtx.fill();
+
+        // נקודות/הצללת עפרון על הגב
+        targetCtx.fillStyle = colorSpec.spots;
+        [[-8, -10, 2.3], [-13, -5, 1.9], [-4, -13, 1.8]].forEach(([dx, dy, r]) => {
+            targetCtx.beginPath();
+            targetCtx.arc(dx, dy, r, 0, Math.PI * 2);
+            targetCtx.fill();
+        });
+
+        // רגל קדמית
+        targetCtx.strokeStyle = '#23262b';
+        targetCtx.lineWidth = 2.2;
+        targetCtx.beginPath();
+        targetCtx.moveTo(7, 1);
+        targetCtx.lineTo(10, 10);
+        targetCtx.lineTo(15, 10);
+        targetCtx.stroke();
+
+        // חיוך הצפרדע
+        targetCtx.beginPath();
+        targetCtx.arc(11, -6, 6, 0.1, 0.95);
+        targetCtx.stroke();
+
+        // עיניים בולטות בראש
+        targetCtx.fillStyle = colorSpec.body;
+        targetCtx.beginPath();
+        targetCtx.arc(4, -17, 6.2, 0, Math.PI * 2);
+        targetCtx.arc(13, -15, 5.8, 0, Math.PI * 2);
+        targetCtx.fill();
+        targetCtx.stroke();
+
+        targetCtx.fillStyle = '#ffffff';
+        targetCtx.beginPath();
+        targetCtx.arc(4.5, -17, 4.1, 0, Math.PI * 2);
+        targetCtx.arc(13.5, -15, 3.8, 0, Math.PI * 2);
+        targetCtx.fill();
+
+        targetCtx.fillStyle = '#23262b';
+        targetCtx.beginPath();
+        targetCtx.arc(5.8, -17, 2.1, 0, Math.PI * 2);
+        targetCtx.arc(14.8, -15, 2.0, 0, Math.PI * 2);
+        targetCtx.fill();
+
+        // מאפיינים ייחודיים לפי סוג הצפרדע שנבחר
+        if (frogType.id === 'male_frog') {
+            // עניבת פרפר אדומה
+            targetCtx.fillStyle = '#e63946';
+            targetCtx.beginPath();
+            targetCtx.moveTo(11, -1); targetCtx.lineTo(6, -4); targetCtx.lineTo(6, 2); targetCtx.closePath();
+            targetCtx.moveTo(11, -1); targetCtx.lineTo(16, -4); targetCtx.lineTo(16, 2); targetCtx.closePath();
+            targetCtx.fill();
+            targetCtx.stroke();
+        } else if (frogType.id === 'female_frog') {
+            // לחיים ורודות וריסים
+            targetCtx.fillStyle = 'rgba(244, 114, 182, 0.65)';
+            targetCtx.beginPath();
+            targetCtx.arc(13, -9, 3.2, 0, Math.PI * 2);
+            targetCtx.fill();
+
+            targetCtx.strokeStyle = '#23262b';
+            targetCtx.lineWidth = 1.6;
+            targetCtx.beginPath();
+            targetCtx.moveTo(3, -23); targetCtx.lineTo(1, -26);
+            targetCtx.moveTo(6, -23); targetCtx.lineTo(6, -26);
+            targetCtx.moveTo(13, -21); targetCtx.lineTo(14, -24);
+            targetCtx.stroke();
+        } else if (frogType.id === 'prince_frog') {
+            // נזר נסיך קטן
+            targetCtx.fillStyle = '#ffd60a';
+            targetCtx.beginPath();
+            targetCtx.moveTo(3, -22); targetCtx.lineTo(5, -28); targetCtx.lineTo(8, -24);
+            targetCtx.lineTo(11, -28); targetCtx.lineTo(13, -22);
+            targetCtx.closePath();
+            targetCtx.fill();
+            targetCtx.stroke();
+        } else if (frogType.id === 'king_frog') {
+            // כתר מלך גדול
+            targetCtx.fillStyle = '#ffb703';
+            targetCtx.beginPath();
+            targetCtx.moveTo(1, -22); targetCtx.lineTo(0, -32); targetCtx.lineTo(5, -26);
+            targetCtx.lineTo(9, -34); targetCtx.lineTo(13, -26); targetCtx.lineTo(17, -31);
+            targetCtx.lineTo(15, -22);
+            targetCtx.closePath();
+            targetCtx.fill();
+            targetCtx.stroke();
+        }
+
+        // אביזרים נבחרים מהחנות
+        if (accId === 'party_hat') {
+            targetCtx.fillStyle = '#ff5964';
+            targetCtx.beginPath();
+            targetCtx.moveTo(2, -22); targetCtx.lineTo(14, -21); targetCtx.lineTo(8, -36);
+            targetCtx.closePath();
+            targetCtx.fill();
+            targetCtx.stroke();
+        } else if (accId === 'sunglasses') {
+            targetCtx.fillStyle = '#111827';
+            targetCtx.beginPath();
+            targetCtx.roundRect(1, -20, 17, 6.5, 2);
+            targetCtx.fill();
+            targetCtx.stroke();
+        } else if (accId === 'pirate_hat') {
+            targetCtx.fillStyle = '#1f2937';
+            targetCtx.beginPath();
+            targetCtx.moveTo(-4, -21);
+            targetCtx.quadraticCurveTo(8, -34, 20, -20);
+            targetCtx.closePath();
+            targetCtx.fill();
+            targetCtx.stroke();
+        } else if (accId === 'royal_crown') {
+            targetCtx.fillStyle = '#facc15';
+            targetCtx.beginPath();
+            targetCtx.moveTo(2, -22); targetCtx.lineTo(2, -30); targetCtx.lineTo(6, -26);
+            targetCtx.lineTo(9, -32); targetCtx.lineTo(12, -26); targetCtx.lineTo(15, -30);
+            targetCtx.lineTo(14, -22);
+            targetCtx.closePath();
+            targetCtx.fill();
+            targetCtx.stroke();
+        }
+
+        targetCtx.restore();
+    }
+
+    function drawSplashAndPopups() {
+        splashParticles.forEach(p => {
+            ctx.fillStyle = `rgba(186, 230, 253, ${Math.min(1, p.life * 1.6)})`;
+            ctx.strokeStyle = '#155fa0';
+            ctx.lineWidth = 1.4;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+        });
+
+        ctx.font = '900 18px "Rubik", sans-serif';
+        ctx.textAlign = 'center';
+        floatingPopups.forEach(fp => {
+            ctx.fillStyle = `rgba(35, 38, 43, ${Math.min(1, fp.life * 1.3)})`;
+            ctx.fillText(fp.text, fp.x, fp.y);
+        });
+    }
+
+    function renderStorePreview() {
+        if (state !== 'STORE') return;
+        previewCtx.clearRect(0, 0, 190, 150);
+
+        // עלה חבצלת קטן בתצוגה המקדימה
+        previewCtx.fillStyle = '#58b847';
+        previewCtx.strokeStyle = '#23262b';
+        previewCtx.lineWidth = 2;
+        previewCtx.beginPath();
+        previewCtx.ellipse(95, 108, 48, 20, 0, 0.25, Math.PI * 2 - 0.25);
+        previewCtx.lineTo(95, 108);
+        previewCtx.closePath();
+        previewCtx.fill();
+        previewCtx.stroke();
+
+        drawFrogCharacter(previewCtx, 95, 96, 1, 1, 1.55);
+    }
+
+    function render() {
+        drawWatercolorPond();
+
+        ctx.save();
+        ctx.translate(-cameraX, 0);
+
+        lilyPads.forEach(drawLilyPad);
+        drawAimingArrow();
+        drawFrogCharacter(ctx, frog.x, frog.y, frog.squashX, frog.squashY, 1);
+        drawSplashAndPopups();
+
+        ctx.restore();
+        renderStorePreview();
+    }
+
+    // =========================================================================
+    // 11. לולאת המשחק הראשית
+    // =========================================================================
+    function loop(timestamp) {
+        if (!lastTime) lastTime = timestamp;
+        const dt = Math.min(0.05, (timestamp - lastTime) / 1000);
+        lastTime = timestamp;
+
+        update(dt);
+        render();
+        requestAnimationFrame(loop);
+    }
+
+    window.onload = () => {
+        resize();
+        buildLevel(progress.level);
+        requestAnimationFrame(loop);
+    };
+})();
+</script>
+</body>
+</html>
