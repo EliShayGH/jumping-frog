@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>הצפרדע הקופצת - משחק מחברת בצבעי מים</title>
     <!-- גופנים ידידותיים בעברית -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -81,6 +81,7 @@
             height: 100%;
             position: relative;
             z-index: 2;
+            touch-action: none;
         }
 
         /* כרטיסים וכפתורים בסגנון סקיצה */
@@ -139,9 +140,9 @@
         /* סרגל עליון (HUD) */
         #hud {
             position: absolute;
-            top: 12px;
-            left: 14px;
-            right: 14px;
+            top: max(12px, env(safe-area-inset-top));
+            left: max(14px, env(safe-area-inset-left));
+            right: max(14px, env(safe-area-inset-right));
             z-index: 10;
             display: flex;
             align-items: center;
@@ -191,15 +192,19 @@
         /* פקדי שליטה על המסך (למגע, טאבלט ועכבר) */
         #touch-controls {
             position: absolute;
-            bottom: 14px;
-            left: 14px;
-            right: 14px;
+            bottom: max(14px, env(safe-area-inset-bottom));
+            left: max(14px, env(safe-area-inset-left));
+            right: max(14px, env(safe-area-inset-right));
             z-index: 12;
             display: flex;
             align-items: flex-end;
             justify-content: space-between;
             pointer-events: none;
             gap: 10px;
+        }
+
+        #game-frame:not(.show-buttons) #touch-controls {
+            display: none;
         }
 
         .dpad-group {
@@ -251,12 +256,14 @@
             align-items: center;
             justify-content: center;
             padding: 16px;
-            transition: opacity 0.2s ease;
+            transition: opacity 0.2s ease, visibility 0.2s;
         }
 
         .overlay.hidden {
             opacity: 0;
+            visibility: hidden;
             pointer-events: none;
+            backdrop-filter: none;
         }
 
         .modal {
@@ -470,6 +477,9 @@
             transform: translateX(-50%) translateY(-16px);
             z-index: 40;
             padding: 8px 20px;
+            width: max-content;
+            max-width: 92vw;
+            text-align: center;
             background: var(--gold-light);
             font-weight: 800;
             font-size: 1.05rem;
@@ -490,12 +500,74 @@
             .ctrl-key { min-width: 46px; height: 46px; padding: 2px 6px; font-size: 0.75rem; }
             #btn-jump-action { height: 54px; padding: 0 20px; font-size: 1.15rem; }
         }
+
+        /* מסכים נמוכים (טלפון לרוחב) */
+        @media (max-height: 500px) {
+            #hud { top: max(6px, env(safe-area-inset-top)); gap: 6px; }
+            .hud-cluster { gap: 6px; }
+            .hud-badge { padding: 3px 10px; gap: 6px; }
+            .hud-badge span { font-size: 1.05rem !important; }
+            .hud-badge .lbl { font-size: 0.68rem; }
+            .hud-badge .val { font-size: 0.98rem; }
+            .aim-readout { display: none; }
+            #hud .sketch-btn { padding: 5px 10px; font-size: 0.88rem; }
+            #btn-reset-level .btn-label { display: none; }
+            #toast { top: 50px; font-size: 0.95rem; }
+
+            .overlay { padding: 8px; }
+            .modal { padding: 14px 18px; gap: 10px; max-height: calc(100vh - 16px); }
+            .modal h1 { font-size: 1.6rem; }
+            .modal p { font-size: 0.95rem; }
+
+            .modal.store-modal { padding: 10px 14px; gap: 8px; }
+            .store-top { padding-bottom: 6px; }
+            .store-top h1 { font-size: 1.25rem !important; }
+            .store-top p { display: none; }
+            .store-body { grid-template-columns: 165px 1fr; gap: 10px; }
+            .frog-preview-card { padding: 8px; gap: 4px; }
+            #store-preview-canvas { width: 145px; height: 115px; }
+            .store-tabs { margin-bottom: 6px; }
+            .tab-btn { padding: 5px 8px; font-size: 0.9rem; }
+            .store-grid { max-height: calc(100vh - 150px); grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 8px; }
+            .item-card { padding: 6px; gap: 4px; justify-content: flex-start; }
+            .item-card .item-sub { display: none; }
+            .item-card .sketch-btn { margin-top: auto; }
+            .item-icon { width: 32px; height: 32px; font-size: 1.05rem; }
+            .item-title { font-size: 0.9rem; }
+            .item-sub { font-size: 0.72rem; }
+        }
+
+        /* טלפון לאורך: בקשה לסובב (באפליקציה המסך נעול לרוחב) */
+        #rotate-hint {
+            display: none;
+            position: absolute;
+            inset: 0;
+            z-index: 60;
+            background: var(--paper-bg);
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            text-align: center;
+            padding: 24px;
+            font-weight: 800;
+            font-size: 1.35rem;
+        }
+        #rotate-hint .big { font-size: 3.4rem; }
+        @media (orientation: portrait) and (max-width: 700px) {
+            #rotate-hint { display: flex; }
+        }
     </style>
 </head>
 <body>
 
 <div id="game-frame">
     <div id="paper-grain"></div>
+
+    <div id="rotate-hint" class="sketch-card">
+        <div class="big">📱↪️</div>
+        <div>סובבו את הטלפון לרוחב כדי לשחק</div>
+    </div>
 
     <!-- סרגל עליון (HUD) -->
     <div id="hud">
@@ -524,7 +596,8 @@
 
         <div class="hud-cluster">
             <button class="sketch-btn gold" id="btn-open-store">🐸 חנות הצפרדעים</button>
-            <button class="sketch-btn" id="btn-reset-level" title="התחל שלב מחדש">🔄 התחל מחדש</button>
+            <button class="sketch-btn" id="btn-reset-level" title="התחל שלב מחדש">🔄 <span class="btn-label">התחל מחדש</span></button>
+            <button class="sketch-btn" id="btn-toggle-controls" title="הצג / הסתר כפתורי שליטה">🎮</button>
             <button class="sketch-btn" id="btn-sound" title="השתק / הפעל צליל">🔊</button>
         </div>
     </div>
@@ -569,12 +642,14 @@
             </p>
 
             <div class="controls-legend">
-                <div class="legend-item"><span class="kbd">⬆️</span> הארכת החץ (קפיצה רחוקה)</div>
-                <div class="legend-item"><span class="kbd">⬇️</span> קיצור החץ (קפיצה קרובה)</div>
-                <div class="legend-item"><span class="kbd">➡️</span> סיבוב החץ ימינה (נמוך)</div>
-                <div class="legend-item"><span class="kbd">⬅️</span> סיבוב החץ שמאלה (גבוה)</div>
-                <div class="legend-item" style="grid-column: span 2; justify-content: center;">
-                    <span class="kbd">רווח / Space</span> <strong>קפיצה!</strong>
+                <div class="legend-item" style="grid-column: span 2;">
+                    <span class="kbd">👆</span> <span><strong>משכו אחורה</strong> מהצפרדע או מכל מקום במים, <strong>ושחררו</strong> כדי לקפוץ!</span>
+                </div>
+                <div class="legend-item" style="grid-column: span 2;">
+                    <span class="kbd">↩️</span> <span>החזירו את האצבע לנקודת ההתחלה כדי לבטל</span>
+                </div>
+                <div class="legend-item legend-keys" style="grid-column: span 2;">
+                    <span class="kbd">⬆️⬇️⬅️➡️</span> <span>במקלדת: כיוון ועוצמה, <span class="kbd">רווח</span> לקפיצה</span>
                 </div>
             </div>
 
@@ -877,7 +952,8 @@
                     unlockedAccessories: Array.isArray(data.unlockedAccessories) ? data.unlockedAccessories : ['none'],
                     equippedFrog: data.equippedFrog || 'starter_gray',
                     equippedColor: data.equippedColor || 'gray',
-                    equippedAccessory: data.equippedAccessory || 'none'
+                    equippedAccessory: data.equippedAccessory || 'none',
+                    showButtons: data.showButtons === true
                 };
             }
         } catch (e) {
@@ -891,7 +967,8 @@
             unlockedAccessories: ['none'],
             equippedFrog: 'starter_gray',
             equippedColor: 'gray',
-            equippedAccessory: 'none'
+            equippedAccessory: 'none',
+            showButtons: false
         };
     }
 
@@ -936,6 +1013,9 @@
     // מצב קלט רציף (לחיצה ממושכת על החצים)
     const keysHeld = { left: false, right: false, up: false, down: false };
 
+    // משיכת קלע במגע (ראו "שליטה במגע" למטה)
+    let sling = null; // { id, fromFrog, ax, ay, fx, fy, armed, ratio }
+
     // נתוני שלב נוכחי
     let lilyPads = [];
     let ripples = [];
@@ -962,6 +1042,8 @@
     };
 
     function resize() {
+        // גודל המסך משתנה באמצע משיכה → מבטלים אותה כדי שהחץ לא "יקפוץ"
+        sling = null;
         const rect = canvas.parentElement.getBoundingClientRect();
         W = rect.width;
         H = rect.height;
@@ -969,6 +1051,21 @@
         canvas.width = Math.floor(W * dpr);
         canvas.height = Math.floor(H * dpr);
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        // עלים שומרים על מקומם היחסי במים אחרי סיבוב/שינוי גודל
+        if (lilyPads.length > 0) {
+            const span = getWaterSpan();
+            const top = getWaterTopY();
+            lilyPads.forEach(pad => {
+                if (typeof pad.ny !== 'number') return;
+                const newBase = top + span * pad.ny;
+                pad.y += newBase - pad.baseY;
+                pad.baseY = newBase;
+            });
+            ripples.forEach(r => {
+                r.y = Math.min(H - 15, Math.max(top + 20, r.y));
+            });
+        }
 
         if (lilyPads.length > 0 && state !== 'JUMPING') {
             const pad = lilyPads[frog.currentPadIndex] || lilyPads[0];
@@ -987,6 +1084,10 @@
         return H * 0.43;
     }
 
+    function getWaterSpan() {
+        return Math.max(180, (H - 105) - getWaterTopY());
+    }
+
     function buildLevel(levelNum) {
         lilyPads = [];
         splashParticles = [];
@@ -996,8 +1097,7 @@
         cameraX = 0;
 
         const waterTop = getWaterTopY();
-        const waterBottom = H - 105;
-        const waterSpan = Math.max(180, waterBottom - waterTop);
+        const waterSpan = getWaterSpan();
 
         // עלה התחלה גדול בצד שמאל
         const startX = 125;
@@ -1106,6 +1206,7 @@
         });
 
         worldWidth = Math.max(W, goalX + 190);
+        lilyPads.forEach(pad => { pad.ny = (pad.baseY - waterTop) / waterSpan; });
 
         // מיקום הצפרדע על עלה ההתחלה
         frog.currentPadIndex = 0;
@@ -1428,6 +1529,114 @@
         el.addEventListener('pointercancel', upFn);
     });
 
+    // -------------------------------------------------------------------------
+    // שליטה במגע: "קלע" — מושכים אחורה מהצפרדע או מכל מקום במים ומשחררים
+    // -------------------------------------------------------------------------
+    const SLING_DEADZONE = 18;      // משיכה קצרה מזה = ביטול (אין קפיצה)
+    const SLING_GRAB_RADIUS = 58;   // נגיעה קרובה לצפרדע = תפיסת הצפרדע עצמה
+
+    function canvasPoint(e) {
+        const r = canvas.getBoundingClientRect();
+        return { x: e.clientX - r.left, y: e.clientY - r.top };
+    }
+
+    function slingMaxPull() {
+        return Math.max(90, Math.min(170, H * 0.34));
+    }
+
+    // מחשב זווית ועוצמה מהמשיכה (נקרא בכל פריים, כך שעלה צף לא מזיז את הכיוון)
+    function applySlingAim() {
+        if (!sling) return;
+        const ax = sling.fromFrog ? frog.x - cameraX : sling.ax;
+        const ay = sling.fromFrog ? frog.y - 12 : sling.ay;
+        const dx = ax - sling.fx;          // מושכים שמאלה → קופצים ימינה
+        const dyUp = sling.fy - ay;        // מושכים למטה → קופצים למעלה
+        const dist = Math.hypot(dx, dyUp);
+        sling.armed = dist >= SLING_DEADZONE;
+        if (!sling.armed) return;
+        let ang = Math.atan2(dyUp, dx) * 180 / Math.PI;
+        if (dx <= 0 && dyUp < 0) ang = MIN_ANGLE_DEG; // משיכה קדימה-למעלה: הכי שטוח
+        aimAngleDeg = Math.max(MIN_ANGLE_DEG, Math.min(MAX_ANGLE_DEG, ang));
+        const ratio = Math.min(1, (dist - SLING_DEADZONE) / (slingMaxPull() - SLING_DEADZONE));
+        aimPower = MIN_POWER + (MAX_POWER - MIN_POWER) * ratio;
+        sling.ratio = ratio;
+    }
+
+    canvas.addEventListener('pointerdown', (e) => {
+        if (state !== 'AIMING' || sling) return;
+        e.preventDefault();
+        audio.ensure();
+        const pt = canvasPoint(e);
+        const frogSX = frog.x - cameraX;
+        const frogSY = frog.y - 12;
+        const fromFrog = Math.hypot(pt.x - frogSX, pt.y - frogSY) <= SLING_GRAB_RADIUS;
+        sling = { id: e.pointerId, fromFrog, ax: pt.x, ay: pt.y, fx: pt.x, fy: pt.y, armed: false, ratio: 0 };
+        try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+    });
+
+    canvas.addEventListener('pointermove', (e) => {
+        if (!sling || e.pointerId !== sling.id) return;
+        e.preventDefault();
+        const pt = canvasPoint(e);
+        sling.fx = pt.x;
+        sling.fy = pt.y;
+        applySlingAim();
+    });
+
+    function endSling(e, cancelled) {
+        if (!sling || e.pointerId !== sling.id) return;
+        e.preventDefault();
+        applySlingAim();
+        const fire = !cancelled && sling.armed && state === 'AIMING';
+        sling = null;
+        if (fire) performJump();
+    }
+    canvas.addEventListener('pointerup', (e) => endSling(e, false));
+    canvas.addEventListener('pointercancel', (e) => endSling(e, true));
+    canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    // ציור הגומייה / טבעת המגע מעל המשחק (בקואורדינטות מסך)
+    function drawSlingOverlay() {
+        if (!sling || state !== 'AIMING') return;
+        const ink = '#23262b';
+        ctx.save();
+        ctx.lineCap = 'round';
+        if (sling.fromFrog) {
+            const fx = frog.x - cameraX, fy = frog.y;
+            ctx.strokeStyle = sling.armed ? '#a0522d' : 'rgba(160, 82, 45, 0.45)';
+            ctx.lineWidth = 3.5;
+            [[fx - 24, fy - 2], [fx + 12, fy + 4]].forEach(([x, y]) => {
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(sling.fx, sling.fy);
+                ctx.stroke();
+            });
+        } else {
+            ctx.strokeStyle = 'rgba(35, 38, 43, 0.7)';
+            ctx.lineWidth = 2;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.28)';
+            ctx.beginPath();
+            ctx.arc(sling.ax, sling.ay, 22, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.setLineDash([6, 5]);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(sling.ax, sling.ay);
+            ctx.lineTo(sling.fx, sling.fy);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+        // נקודת האצבע
+        ctx.fillStyle = 'rgba(255, 253, 246, 0.85)';
+        ctx.strokeStyle = ink;
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.arc(sling.fx, sling.fy, 10, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+    }
+
     document.getElementById('btn-jump-action').addEventListener('pointerdown', (e) => {
         e.preventDefault();
         performJump();
@@ -1462,6 +1671,21 @@
         });
     });
 
+    function applyButtonsSetting() {
+        const on = !!progress.showButtons;
+        document.getElementById('game-frame').classList.toggle('show-buttons', on);
+        document.getElementById('btn-toggle-controls').classList.toggle('pressed', on);
+        if (!on) ['left', 'right', 'up', 'down'].forEach(k => setKey(k, false));
+    }
+    applyButtonsSetting();
+
+    document.getElementById('btn-toggle-controls').addEventListener('click', () => {
+        progress.showButtons = !progress.showButtons;
+        saveProgress();
+        applyButtonsSetting();
+        showToast(progress.showButtons ? 'כפתורי השליטה מוצגים' : 'כפתורי השליטה הוסתרו — משכו כדי לקפוץ');
+    });
+
     document.getElementById('btn-sound').addEventListener('click', () => {
         const muted = audio.toggleMute();
         document.getElementById('btn-sound').textContent = muted ? '🔇' : '🔊';
@@ -1472,6 +1696,7 @@
     // =========================================================================
     function update(dt) {
         timeElapsed += dt;
+        if (sling && state !== 'AIMING') sling = null;
 
         // עדכון תנועת עלי חבצלת צפים
         lilyPads.forEach(pad => {
@@ -1508,6 +1733,15 @@
             const powSpeed = 420;
             if (keysHeld.up) aimPower = Math.min(MAX_POWER, aimPower + powSpeed * dt);
             if (keysHeld.down) aimPower = Math.max(MIN_POWER, aimPower - powSpeed * dt);
+
+            // משיכת קלע במגע: הצפרדע מתכווצת ככל שמושכים חזק יותר
+            if (sling) {
+                applySlingAim();
+                if (sling.armed) {
+                    frog.squashX = 1 + 0.14 * sling.ratio;
+                    frog.squashY = 1 - 0.16 * sling.ratio;
+                }
+            }
 
             updateHUD();
         } else if (state === 'JUMPING') {
@@ -1839,6 +2073,14 @@
     function drawAimingArrow() {
         if (state !== 'AIMING') return;
 
+        // בזמן משיכה קצרה מדי (אזור ביטול) החץ שקוף למחצה — שחרור כאן לא יקפיץ
+        ctx.save();
+        ctx.globalAlpha = sling && !sling.armed ? 0.35 : 1;
+        drawAimingArrowInner();
+        ctx.restore();
+    }
+
+    function drawAimingArrowInner() {
         const rad = (aimAngleDeg * Math.PI) / 180;
         const powerRatio = (aimPower - MIN_POWER) / (MAX_POWER - MIN_POWER);
         const arrowLen = 58 + powerRatio * 95;
@@ -2122,6 +2364,7 @@
 
         ctx.font = '900 18px "Rubik", sans-serif';
         ctx.textAlign = 'center';
+        ctx.direction = 'ltr'; // "+5 🪙" ולא "🪙 5+" בדף מימין לשמאל
         floatingPopups.forEach(fp => {
             ctx.fillStyle = `rgba(35, 38, 43, ${Math.min(1, fp.life * 1.3)})`;
             ctx.fillText(fp.text, fp.x, fp.y);
@@ -2158,6 +2401,7 @@
         drawSplashAndPopups();
 
         ctx.restore();
+        drawSlingOverlay();
         renderStorePreview();
     }
 
