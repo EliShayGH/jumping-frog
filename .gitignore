@@ -1,0 +1,15 @@
+node_modules/
+.DS_Store
+# www/ is generated from index.html + fonts by "npm run build:www"
+www/
+
+# Never commit signing keys or their passwords
+*.jks
+*.keystore
+keystore.properties
+key.properties
+*.p12
+*.pem
+
+# design sketches shown to the owner (not part of the game)
+sketches/

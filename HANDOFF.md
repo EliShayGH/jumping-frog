@@ -40,7 +40,10 @@
 * `README.md` — Hebrew/English player & repository guide.
 * `HANDOFF.md` — This technical context file for future development sessions.
 * `fonts/` — Bundled Rubik (Hebrew/Latin/Arabic) and Assistant woff2 files + their OFL licenses; no network fonts.
-* `NEW_GAME_PLAYBOOK.md` lives with Sketch Bird; this project follows it (Phase 1 in progress: Android wrapper still pending, waiting on the final game name).
+* `package.json`, `capacitor.config.json`, `android/` — Capacitor 8 Android app (see §7).
+* `www/` — generated, git-ignored copy of `index.html` + `fonts/` + `capacitor.js` (`npm run build:www`). Edit the root `index.html`, never `www/`.
+* `NEW_GAME_PLAYBOOK.md` lives with Sketch Bird; this project follows it. **Phase 1 is done.** **Phase 2 in progress** (see §9).
+* `sketches/` — git-ignored design sketches shown to the owner.
 
 ## 5. Key Functions & Systems in `index.html`
 
@@ -55,3 +58,30 @@
 * [ ] Add a level selector map so kids can replay earlier levels for 3-star completion.
 * [ ] Add floating mid-air bonus flies/coins along high jump arcs.
 * [ ] Add subtle background pond ambiance (croaks, gentle water ripples, or toggleable marimba melody).
+## 7. Android app (Phase 1)
+
+* **App ID (temporary):** `com.quantumpairstudios.frogpond`, app name "Jumping Frog". The final game name isn't picked yet; when it is, change `appId`/`appName` in `capacitor.config.json`, `namespace`/`applicationId` in `android/app/build.gradle`, `android/app/src/main/res/values/strings.xml`, and move `MainActivity.java` to the new package folder. Do this **before** the first Play Console upload (the ID can't change after that).
+* **Why `www/` is generated:** the root `index.html` is also the live GitHub Pages site, so it stays at the root. `build:www` copies it into `www/` and adds `<script src="capacitor.js">` only there.
+* **Native setup (copied from Sketch Bird):** landscape only (`sensorLandscape`), full screen with hidden system bars (`MainActivity.java`), `AD_ID` permission removed (Families policy), Gradle 9.1.0 (needed for Android Studio's Java 25 on this Mac).
+* **Back button** (`handleBack()` in `index.html`, app only): store → closes it; aiming → back to the start screen (level kept); mid-jump/splash → ignored; level complete → start screen with the next level; start screen → "לצאת מהמשחק?" confirm (`#exit-overlay`).
+* **Tuning:** `MAX_POWER` lowered 920 → 700 → 620 (owner: 700 still a bit strong) so a full pull is just under two pads on a phone (the phone screen is ~717×326 CSS px). The water/hills edge strokes now only trace the shoreline/hill line (they used to outline the screen edges with a white/dark line).
+* **Build & install:** `npm run sync`, then in `android/`: `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew assembleDebug`, then `adb -s <device> install -r app/build/outputs/apk/debug/app-debug.apk`.
+* **Icon & splash (Phase 2, owner picked "icon 2"):** gray frog on a lily pad on blue water, drawn with the game's own frog code. Adaptive icon = `mipmap-*/ic_launcher_background.png` (water) + `ic_launcher_foreground.png` (frog + pad inside the safe circle); legacy/round PNGs; splash = paper color with the frog on its pad (no text, works in every language). Play Store 512 icon: `store-assets/icon-512.png`.
+* **Not done yet:** Xiaomi install.
+
+## 8. Owner decisions (Nov 2026)
+
+* **Audience:** same as Sketch Bird: kids and families (friendly copy, Families-policy-safe ads).
+* **Languages:** all 5 like Sketch Bird: Hebrew, English, Arabic, Spanish, French (right-to-left for Hebrew and Arabic). Every new string goes in all 5; Settings gets a language picker.
+
+## 9. Phase 2 progress
+
+Approved Phase 2 list: (1) home screen, (2) settings, (3) pause, (4) first-play tutorial, (5) vibration, (6) tidy the top bar for phones, (7) level-complete screen, (8) opening animation, (9) app icon + splash.
+
+**Done:**
+* **5 languages:** `LANGUAGES` + `I18N` (he/en/ar/es/fr) after the catalogs. HTML text uses `data-i18n="key"` / `data-i18n-title="key"`; `applyLanguage()` fills them and sets `dir`. Dynamic text uses `t('key', ...args)`; catalog names via `frogName/frogDesc/colorName/accName/accDesc`. Language is saved in `progress.language`; the first launch uses the phone language (fallback English).
+* **Home screen** (owner picked layout C with A's title): the pond is the menu. Big lily pad with the frog = Play, side pads = Shop / Settings. Pads + frog are drawn on the canvas by `drawHomeScene()` using `homeLayout()`; transparent `.home-pad` buttons sit on top (`layoutHomeButtons()`). `#start-overlay` is now this home layer, so existing show/hide code still works. HUD/touch buttons are hidden at home (`.at-home`). The old instructions card is gone; a one-time hint toast (`firstHint`, `progress.seenHint`) shows on first play until the tutorial (item 4) exists.
+* **Settings** (`#settings-overlay`, state `SETTINGS`): language picker + sound (saved in `progress.muted`). Vibration and privacy link to be added.
+* **Icon + splash:** see §7.
+
+**Next:** pause menu, tutorial, vibration, top-bar tidy, level-complete screen, opening animation.

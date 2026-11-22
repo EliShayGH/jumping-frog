@@ -594,6 +594,97 @@
             .item-sub { font-size: 0.72rem; }
         }
 
+
+        /* ===== מסך הבית: הבריכה היא התפריט ===== */
+        .overlay.home-layer {
+            background: transparent;
+            backdrop-filter: none;
+            display: block;
+            padding: 0;
+            z-index: 20;
+        }
+        #game-frame.at-home #hud,
+        #game-frame.at-home #touch-controls { display: none; }
+
+        #home-title {
+            position: absolute;
+            top: max(14px, 4vh);
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-weight: 900;
+            font-size: clamp(1.9rem, 11vh, 3.6rem);
+            line-height: 1.1;
+            letter-spacing: 0.5px;
+            color: var(--ink);
+            transform: rotate(-2deg);
+            text-shadow: 3px 3px 0 var(--gold-light), 4px 4px 0 var(--ink);
+            pointer-events: none;
+            padding: 0 90px;
+        }
+
+        #home-stats {
+            position: absolute;
+            top: 12px;
+            inset-inline-end: max(14px, env(safe-area-inset-left), env(safe-area-inset-right));
+            padding: 3px 12px;
+            font-weight: 800;
+            font-size: 0.95rem;
+            direction: ltr;
+            white-space: nowrap;
+        }
+
+        /* כפתור שקוף מעל עלה מצויר; התווית יושבת בתחתית העלה */
+        .home-pad {
+            position: absolute;
+            background: transparent;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            border-radius: 50%;
+            font-family: inherit;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .home-tag {
+            position: absolute;
+            left: 50%;
+            bottom: -6px;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            background: #fffdf6;
+            border: 2.5px solid var(--ink);
+            border-radius: 20px;
+            box-shadow: 2px 2px 0 var(--ink);
+            padding: calc(3px * var(--hs, 1)) calc(12px * var(--hs, 1));
+            font-weight: 900;
+            font-size: calc(0.98rem * var(--hs, 1));
+            color: var(--ink);
+            transition: transform 0.08s ease;
+        }
+        .home-tag.big {
+            background: var(--gold-light);
+            font-size: calc(1.4rem * var(--hs, 1));
+            padding: calc(4px * var(--hs, 1)) calc(24px * var(--hs, 1));
+            box-shadow: 3px 3px 0 var(--ink);
+        }
+        .home-pad:active .home-tag { transform: translateX(-50%) translateY(2px) scale(0.97); }
+
+        /* ===== הגדרות ===== */
+        .settings-modal { max-width: 600px; gap: 12px; }
+        .settings-row.stack { flex-direction: column; align-items: stretch; gap: 6px; }
+        .settings-row {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .settings-lbl { font-weight: 800; font-size: 1.05rem; }
+        .lang-options { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+        .lang-options .sketch-btn { padding: 5px 10px; font-size: 0.9rem; }
+        .lang-options .sketch-btn.active { background: var(--gold-light); }
+
         /* טלפון לאורך: בקשה לסובב (באפליקציה המסך נעול לרוחב) */
         #rotate-hint {
             display: none;
@@ -623,7 +714,7 @@
 
     <div id="rotate-hint" class="sketch-card">
         <div class="big">📱↪️</div>
-        <div>סובבו את הטלפון לרוחב כדי לשחק</div>
+        <div data-i18n="rotateHint">סובבו את הטלפון לרוחב כדי לשחק</div>
     </div>
 
     <!-- סרגל עליון (HUD) -->
@@ -632,7 +723,7 @@
             <div class="sketch-card hud-badge">
                 <span style="font-size:1.35rem;">🪙</span>
                 <div>
-                    <div class="lbl">מטבעות בבנק</div>
+                    <div class="lbl" data-i18n="hudBank">מטבעות בבנק</div>
                     <div class="val" id="hud-coins">0</div>
                 </div>
             </div>
@@ -640,26 +731,26 @@
             <div class="sketch-card hud-badge">
                 <span style="font-size:1.35rem;">🚩</span>
                 <div>
-                    <div class="lbl">שלב</div>
+                    <div class="lbl" data-i18n="hudLevel">שלב</div>
                     <div class="val" id="hud-level">1</div>
                 </div>
             </div>
 
-            <div class="sketch-card aim-readout" title="זווית ועוצמת הקפיצה">
-                <span>📐 זווית: <strong id="hud-angle">42°</strong></span>
-                <span>⚡ עוצמה: <strong id="hud-power">60%</strong></span>
+            <div class="sketch-card aim-readout" data-i18n-title="aimTitle" title="זווית ועוצמת הקפיצה">
+                <span>📐 <span data-i18n="aimAngle">זווית:</span> <strong id="hud-angle">42°</strong></span>
+                <span>⚡ <span data-i18n="aimPower">עוצמה:</span> <strong id="hud-power">60%</strong></span>
             </div>
         </div>
 
         <div class="hud-cluster">
-            <button class="sketch-btn gold" id="btn-open-store">🐸 חנות הצפרדעים</button>
-            <button class="sketch-btn" id="btn-reset-level" title="התחל שלב מחדש">🔄 <span class="btn-label">התחל מחדש</span></button>
-            <button class="sketch-btn" id="btn-toggle-controls" title="הצג / הסתר כפתורי שליטה">🎮</button>
-            <button class="sketch-btn" id="btn-sound" title="השתק / הפעל צליל">🔊</button>
+            <button class="sketch-btn gold" id="btn-open-store" data-i18n="storeBtn">🐸 חנות הצפרדעים</button>
+            <button class="sketch-btn" id="btn-reset-level" data-i18n-title="restartTitle" title="התחל שלב מחדש">🔄 <span class="btn-label" data-i18n="restartLabel">התחל מחדש</span></button>
+            <button class="sketch-btn" id="btn-toggle-controls" data-i18n-title="controlsTitle" title="הצג / הסתר כפתורי שליטה">🎮</button>
+            <button class="sketch-btn" id="btn-sound" data-i18n-title="soundTitle" title="השתק / הפעל צליל">🔊</button>
         </div>
     </div>
 
-    <div id="toast" class="sketch-card">הפריט נרכש!</div>
+    <div id="toast" class="sketch-card"></div>
 
     <!-- קנבס המשחק -->
     <canvas id="pond-canvas"></canvas>
@@ -667,56 +758,60 @@
     <!-- פקדי שליטה על המסך -->
     <div id="touch-controls">
         <div class="dpad-group">
-            <button class="sketch-btn ctrl-key" id="key-right" title="סובב חץ עם כיוון השעון (ימינה)">
+            <button class="sketch-btn ctrl-key" id="key-right" data-i18n-title="keyRightTitle" title="סובב חץ עם כיוון השעון (ימינה)">
                 <span class="arrow">➡️</span>
-                <span>ימינה</span>
+                <span data-i18n="keyRight">ימינה</span>
             </button>
-            <button class="sketch-btn ctrl-key" id="key-up" title="הארך חץ - קפיצה חזקה (למעלה)">
+            <button class="sketch-btn ctrl-key" id="key-up" data-i18n-title="keyUpTitle" title="הארך חץ - קפיצה חזקה (למעלה)">
                 <span class="arrow">⬆️</span>
-                <span>חזק +</span>
+                <span data-i18n="keyUp">חזק +</span>
             </button>
-            <button class="sketch-btn ctrl-key" id="key-down" title="קצר חץ - קפיצה חלשה (למטה)">
+            <button class="sketch-btn ctrl-key" id="key-down" data-i18n-title="keyDownTitle" title="קצר חץ - קפיצה חלשה (למטה)">
                 <span class="arrow">⬇️</span>
-                <span>חלש -</span>
+                <span data-i18n="keyDown">חלש -</span>
             </button>
-            <button class="sketch-btn ctrl-key" id="key-left" title="סובב חץ נגד כיוון השעון (שמאלה)">
+            <button class="sketch-btn ctrl-key" id="key-left" data-i18n-title="keyLeftTitle" title="סובב חץ נגד כיוון השעון (שמאלה)">
                 <span class="arrow">⬅️</span>
-                <span>שמאלה</span>
+                <span data-i18n="keyLeft">שמאלה</span>
             </button>
         </div>
 
-        <button class="sketch-btn" id="btn-jump-action">
-            🦘 קפוץ! (רווח)
-        </button>
+        <button class="sketch-btn" id="btn-jump-action" data-i18n="jumpBtn">🦘 קפוץ! (רווח)</button>
     </div>
 
-    <!-- מסך פתיחה -->
-    <div id="start-overlay" class="overlay">
-        <div class="sketch-card modal">
-            <h1>🐸 הצפרדע הקופצת</h1>
-            <p>
-                עזרו לצפרדע לקפוץ מעלה לעלה מעל המים הכחולים, לאסוף מטבעות נוצצים ולהגיע אל <strong>הדגל האדום</strong>!
-            </p>
+    <!-- מסך הבית: הבריכה עצמה היא התפריט (עלה גדול = שחק, עלים קטנים = חנות / הגדרות).
+         העלים והצפרדע מצוירים על הקנבס (drawHomeScene); כאן רק הכותרת והכפתורים השקופים מעליהם. -->
+    <div id="start-overlay" class="overlay home-layer">
+        <h1 id="home-title" data-i18n="gameTitle">הצפרדע הקופצת</h1>
+        <div id="home-stats" class="sketch-card">🚩 <span id="home-level">1</span> · 🪙 <span id="home-coins">0</span></div>
+        <button class="home-pad" id="btn-start-game"><span class="home-tag big" data-i18n="homePlay">▶ שחק</span></button>
+        <button class="home-pad" id="btn-start-store"><span class="home-tag" data-i18n="homeStore">🐸 חנות</span></button>
+        <button class="home-pad" id="btn-open-settings"><span class="home-tag" data-i18n="homeSettings">⚙️ הגדרות</span></button>
+    </div>
 
-            <div class="controls-legend">
-                <div class="legend-item" style="grid-column: span 2;">
-                    <span class="kbd">👆</span> <span><strong>משכו אחורה</strong> מהצפרדע או מכל מקום במים, <strong>ושחררו</strong> כדי לקפוץ!</span>
-                </div>
-                <div class="legend-item" style="grid-column: span 2;">
-                    <span class="kbd">↩️</span> <span>החזירו את האצבע לנקודת ההתחלה כדי לבטל</span>
-                </div>
-                <div class="legend-item legend-keys" style="grid-column: span 2;">
-                    <span class="kbd">⬆️⬇️⬅️➡️</span> <span>במקלדת: כיוון ועוצמה, <span class="kbd">רווח</span> לקפיצה</span>
-                </div>
+    <!-- הגדרות -->
+    <div id="settings-overlay" class="overlay hidden">
+        <div class="sketch-card modal settings-modal">
+            <h1 data-i18n="settingsTitle">⚙️ הגדרות</h1>
+            <div class="settings-row stack">
+                <span class="settings-lbl" data-i18n="settingsLanguage">שפה</span>
+                <div id="lang-options" class="lang-options"></div>
             </div>
+            <div class="settings-row">
+                <span class="settings-lbl" data-i18n="settingsSound">צלילים</span>
+                <button class="sketch-btn" id="btn-settings-sound"></button>
+            </div>
+            <button class="sketch-btn gold" id="btn-close-settings" data-i18n="closeBtn">✖️ סגור</button>
+        </div>
+    </div>
 
-            <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
-                <button class="sketch-btn gold" style="font-size:1.25rem; padding:12px 28px;" id="btn-start-game">
-                    🚀 התחל לשחק!
-                </button>
-                <button class="sketch-btn" id="btn-start-store">
-                    🐸 חנות הצפרדעים
-                </button>
+    <!-- אישור יציאה (כפתור "חזור" באנדרואיד במסך הפתיחה) -->
+    <div id="exit-overlay" class="overlay hidden" style="z-index:40;">
+        <div class="sketch-card modal" style="max-width:360px;">
+            <h1 data-i18n="exitTitle">לצאת מהמשחק?</h1>
+            <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:12px;">
+                <button class="sketch-btn" id="btn-exit-yes" data-i18n="exitYes">כן, לצאת</button>
+                <button class="sketch-btn gold" id="btn-exit-no" data-i18n="exitNo">להמשיך לשחק</button>
             </div>
         </div>
     </div>
@@ -724,32 +819,28 @@
     <!-- מסך סיום שלב -->
     <div id="win-overlay" class="overlay hidden">
         <div class="sketch-card modal">
-            <h1 id="win-title">🎉 כל הכבוד! הגעתם לדגל!</h1>
+            <h1 id="win-title"></h1>
             <div class="stars-display" id="win-stars">★★★</div>
-            <p id="win-desc">הצפרדע חצתה את הבריכה בהצלחה ואספה את מטבע הדגל הגדול (10)!</p>
+            <p id="win-desc" data-i18n="winDesc">הצפרדע חצתה את הבריכה בהצלחה ואספה את מטבע הדגל הגדול (10)!</p>
 
             <div class="stats-row">
                 <div class="stat-box">
                     <span class="big" id="win-level-coins">+10</span>
-                    <span class="small">מטבעות בשלב</span>
+                    <span class="small" data-i18n="winCoins">מטבעות בשלב</span>
                 </div>
                 <div class="stat-box">
                     <span class="big" id="win-jumps">1</span>
-                    <span class="small">מספר קפיצות</span>
+                    <span class="small" data-i18n="winJumps">מספר קפיצות</span>
                 </div>
                 <div class="stat-box">
                     <span class="big" id="win-total-bank">10</span>
-                    <span class="small">סה״כ בבנק</span>
+                    <span class="small" data-i18n="winBank">סה״כ בבנק</span>
                 </div>
             </div>
 
             <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:4px;">
-                <button class="sketch-btn gold" style="font-size:1.15rem; padding:11px 24px;" id="btn-next-level">
-                    ➡️ לשלב הבא
-                </button>
-                <button class="sketch-btn" id="btn-win-store">
-                    🐸 חנות הצפרדעים
-                </button>
+                <button class="sketch-btn gold" style="font-size:1.15rem; padding:11px 24px;" id="btn-next-level" data-i18n="nextLevel">➡️ לשלב הבא</button>
+                <button class="sketch-btn" id="btn-win-store" data-i18n="storeBtn">🐸 חנות הצפרדעים</button>
             </div>
         </div>
     </div>
@@ -758,33 +849,31 @@
     <div id="store-overlay" class="overlay hidden">
         <div class="sketch-card modal store-modal">
             <div class="store-top">
-                <div style="text-align:right;">
-                    <h1 style="font-size:1.65rem;">🐸 חנות ועיצוב הצפרדע</h1>
-                    <p style="font-size:0.92rem;">שדרגו את הצפרדע האפורה לצפרדע נסיך, מלך, צבעים ואביזרים!</p>
+                <div style="text-align:start;">
+                    <h1 style="font-size:1.65rem;" data-i18n="storeTitle">🐸 חנות ועיצוב הצפרדע</h1>
+                    <p style="font-size:0.92rem;" data-i18n="storeSubtitle">שדרגו את הצפרדע האפורה לצפרדע נסיך, מלך, צבעים ואביזרים!</p>
                 </div>
                 <div style="display:flex; align-items:center; gap:10px;">
                     <div class="sketch-card hud-badge" style="background:var(--gold-light);">
-                        <span>🪙 בבנק:</span>
+                        <span>🪙 <span data-i18n="storeBank">בבנק:</span></span>
                         <strong id="store-bank-display" style="font-size:1.25rem;">0</strong>
                     </div>
-                    <button class="sketch-btn" id="btn-close-store">✖️ סגור</button>
+                    <button class="sketch-btn" id="btn-close-store" data-i18n="closeBtn">✖️ סגור</button>
                 </div>
             </div>
 
             <div class="store-body">
                 <div class="frog-preview-card">
-                    <div style="font-weight:800;">תצוגה מקדימה</div>
+                    <div style="font-weight:800;" data-i18n="previewTitle">תצוגה מקדימה</div>
                     <canvas id="store-preview-canvas" width="190" height="150"></canvas>
-                    <div id="preview-caption" style="font-size:0.86rem; color:var(--ink-soft); font-weight:700;">
-                        צפרדע אפורה • אפור סקיצה
-                    </div>
+                    <div id="preview-caption" style="font-size:0.86rem; color:var(--ink-soft); font-weight:700;"></div>
                 </div>
 
                 <div style="width:100%;">
                     <div class="store-tabs">
-                        <button class="sketch-btn tab-btn active" data-tab="frogs">🐸 צפרדעים</button>
-                        <button class="sketch-btn tab-btn" data-tab="colors">🎨 צבעים</button>
-                        <button class="sketch-btn tab-btn" data-tab="accessories">👑 אביזרים</button>
+                        <button class="sketch-btn tab-btn active" data-tab="frogs" data-i18n="tabFrogs">🐸 צפרדעים</button>
+                        <button class="sketch-btn tab-btn" data-tab="colors" data-i18n="tabColors">🎨 צבעים</button>
+                        <button class="sketch-btn tab-btn" data-tab="accessories" data-i18n="tabAccessories">👑 אביזרים</button>
                     </div>
                     <div class="store-grid" id="store-items-container"></div>
                 </div>
@@ -991,6 +1080,401 @@
         { id: 'royal_crown', name: 'כתר מלכות', desc: 'כתר זהב משובץ אבנים', icon: '👑', price: 50 }
     ];
 
+
+    // =========================================================================
+    // 2ב. חמש שפות (עברית, English, العربية, Español, Français)
+    //     כל מחרוזת חדשה נכנסת לכל 5 השפות באותו שינוי.
+    // =========================================================================
+    const LANGUAGES = [
+        { code: 'he', name: 'עברית', flag: '🇮🇱', dir: 'rtl' },
+        { code: 'en', name: 'English', flag: '🇺🇸', dir: 'ltr' },
+        { code: 'ar', name: 'العربية', flag: '🇸🇦', dir: 'rtl' },
+        { code: 'es', name: 'Español', flag: '🇪🇸', dir: 'ltr' },
+        { code: 'fr', name: 'Français', flag: '🇫🇷', dir: 'ltr' }
+    ];
+
+    const I18N = {
+        he: {
+            pageTitle: 'הצפרדע הקופצת',
+            gameTitle: 'הצפרדע הקופצת',
+            rotateHint: 'סובבו את הטלפון לרוחב כדי לשחק',
+            hudBank: 'מטבעות בבנק',
+            hudLevel: 'שלב',
+            aimTitle: 'זווית ועוצמת הקפיצה',
+            aimAngle: 'זווית:',
+            aimPower: 'עוצמה:',
+            storeBtn: '🐸 חנות הצפרדעים',
+            restartTitle: 'התחל שלב מחדש',
+            restartLabel: 'התחל מחדש',
+            controlsTitle: 'הצג / הסתר כפתורי שליטה',
+            soundTitle: 'השתק / הפעל צליל',
+            keyRight: 'ימינה', keyRightTitle: 'סובב חץ עם כיוון השעון (ימינה)',
+            keyUp: 'חזק +', keyUpTitle: 'הארך חץ - קפיצה חזקה (למעלה)',
+            keyDown: 'חלש -', keyDownTitle: 'קצר חץ - קפיצה חלשה (למטה)',
+            keyLeft: 'שמאלה', keyLeftTitle: 'סובב חץ נגד כיוון השעון (שמאלה)',
+            jumpBtn: '🦘 קפוץ! (רווח)',
+            homePlay: '▶ שחק',
+            homeStore: '🐸 חנות',
+            homeSettings: '⚙️ הגדרות',
+            startSign: 'התחל',
+            firstHint: '👆 משכו אחורה מהצפרדע ושחררו כדי לקפוץ!',
+            settingsTitle: '⚙️ הגדרות',
+            settingsLanguage: 'שפה',
+            settingsSound: 'צלילים',
+            soundOn: '🔊 פועל',
+            soundOff: '🔇 כבוי',
+            closeBtn: '✖️ סגור',
+            exitTitle: 'לצאת מהמשחק?',
+            exitYes: 'כן, לצאת',
+            exitNo: 'להמשיך לשחק',
+            winTitle: (n) => `🎉 שלב ${n} הושלם!`,
+            winDesc: 'הצפרדע חצתה את הבריכה בהצלחה ואספה את מטבע הדגל הגדול (10)!',
+            winCoins: 'מטבעות בשלב',
+            winJumps: 'מספר קפיצות',
+            winBank: 'סה״כ בבנק',
+            nextLevel: '➡️ לשלב הבא',
+            storeTitle: '🐸 חנות ועיצוב הצפרדע',
+            storeSubtitle: 'שדרגו את הצפרדע האפורה לצפרדע נסיך, מלך, צבעים ואביזרים!',
+            storeBank: 'בבנק:',
+            previewTitle: 'תצוגה מקדימה',
+            tabFrogs: '🐸 צפרדעים',
+            tabColors: '🎨 צבעים',
+            tabAccessories: '👑 אביזרים',
+            colorSub: 'צבע מיוחד לצפרדע',
+            equipped: '✅ בשימוש',
+            choose: 'בחר',
+            toastFrog: (name) => `תתחדשו על ${name}!`,
+            toastColor: (name) => `הצפרדע נצבעה ב${name}!`,
+            toastAccessory: (name) => `האביזר "${name}" נרכש!`,
+            controlsShown: 'כפתורי השליטה מוצגים',
+            controlsHidden: 'כפתורי השליטה הוסתרו — משכו כדי לקפוץ',
+            frogs: {
+                starter_gray: ['צפרדע אפורה', 'הצפרדע המצוירת ההתחלתית'],
+                male_frog: ['צפרדע זכר', 'ספורטיבי וחזק עם עניבת פרפר'],
+                female_frog: ['צפרדע נקבה', 'ריסים ארוכים, לחיים ורודות ופרח'],
+                prince_frog: ['צפרדע נסיך', 'אבנט מלכותי ונזר זהב עדין'],
+                king_frog: ['צפרדע מלך', 'גלימת מלכות, כתר גדול והילת זהב']
+            },
+            colors: { gray: 'אפור סקיצה', green: 'ירוק יער', blue: 'כחול מים', red: 'אדום תות', purple: 'סגול מלכותי', gold: 'זהב נוצץ' },
+            accessories: {
+                none: ['ללא אביזר', 'מראה טבעי ונקי'],
+                party_hat: ['כובע מסיבה', 'כובע צבעוני עם פונפון'],
+                sunglasses: ['משקפי שמש', 'משקפיים כהים בסטייל'],
+                pirate_hat: ['כובע פיראט', 'כובע קפטן של יורדי ים'],
+                hero_cape: ['גלימת גיבור', 'גלימה אדומה מתנופפת'],
+                royal_crown: ['כתר מלכות', 'כתר זהב משובץ אבנים']
+            }
+        },
+        en: {
+            pageTitle: 'Jumping Frog',
+            gameTitle: 'Jumping Frog',
+            rotateHint: 'Turn your phone sideways to play',
+            hudBank: 'Coins',
+            hudLevel: 'Level',
+            aimTitle: 'Jump angle and power',
+            aimAngle: 'Angle:',
+            aimPower: 'Power:',
+            storeBtn: '🐸 Frog Shop',
+            restartTitle: 'Restart level',
+            restartLabel: 'Restart',
+            controlsTitle: 'Show / hide control buttons',
+            soundTitle: 'Sound on / off',
+            keyRight: 'Lower', keyRightTitle: 'Turn the arrow lower (right)',
+            keyUp: 'Stronger +', keyUpTitle: 'Longer arrow: stronger jump (up)',
+            keyDown: 'Softer -', keyDownTitle: 'Shorter arrow: softer jump (down)',
+            keyLeft: 'Higher', keyLeftTitle: 'Turn the arrow higher (left)',
+            jumpBtn: '🦘 Jump! (Space)',
+            homePlay: '▶ Play',
+            homeStore: '🐸 Shop',
+            homeSettings: '⚙️ Settings',
+            startSign: 'Start',
+            firstHint: '👆 Pull back from the frog and let go to jump!',
+            settingsTitle: '⚙️ Settings',
+            settingsLanguage: 'Language',
+            settingsSound: 'Sounds',
+            soundOn: '🔊 On',
+            soundOff: '🔇 Off',
+            closeBtn: '✖️ Close',
+            exitTitle: 'Leave the game?',
+            exitYes: 'Yes, leave',
+            exitNo: 'Keep playing',
+            winTitle: (n) => `🎉 Level ${n} complete!`,
+            winDesc: 'The frog crossed the pond and grabbed the big flag coin (10)!',
+            winCoins: 'Coins this level',
+            winJumps: 'Jumps',
+            winBank: 'Total coins',
+            nextLevel: '➡️ Next level',
+            storeTitle: '🐸 Frog Shop',
+            storeSubtitle: 'Unlock new frogs, colors and accessories!',
+            storeBank: 'Coins:',
+            previewTitle: 'Preview',
+            tabFrogs: '🐸 Frogs',
+            tabColors: '🎨 Colors',
+            tabAccessories: '👑 Accessories',
+            colorSub: 'A special color for your frog',
+            equipped: '✅ Using',
+            choose: 'Choose',
+            toastFrog: (name) => `Enjoy your ${name}!`,
+            toastColor: (name) => `Your frog is now ${name}!`,
+            toastAccessory: (name) => `You got the ${name}!`,
+            controlsShown: 'Control buttons are on',
+            controlsHidden: 'Control buttons hidden: pull back to jump',
+            frogs: {
+                starter_gray: ['Gray Frog', 'The hand-drawn starter frog'],
+                male_frog: ['Boy Frog', 'Sporty and strong, with a bow tie'],
+                female_frog: ['Girl Frog', 'Long lashes, pink cheeks and a flower'],
+                prince_frog: ['Prince Frog', 'A royal sash and a little gold circlet'],
+                king_frog: ['King Frog', 'Royal cape, big crown and a golden glow']
+            },
+            colors: { gray: 'Sketch Gray', green: 'Forest Green', blue: 'Water Blue', red: 'Strawberry Red', purple: 'Royal Purple', gold: 'Shiny Gold' },
+            accessories: {
+                none: ['No accessory', 'The natural look'],
+                party_hat: ['Party Hat', 'A colorful hat with a pom-pom'],
+                sunglasses: ['Sunglasses', 'Cool dark shades'],
+                pirate_hat: ['Pirate Hat', 'A real sea captain’s hat'],
+                hero_cape: ['Hero Cape', 'A red cape that flaps in the wind'],
+                royal_crown: ['Royal Crown', 'A gold crown with jewels']
+            }
+        },
+        ar: {
+            pageTitle: 'الضفدع القافز',
+            gameTitle: 'الضفدع القافز',
+            rotateHint: 'أدِر هاتفك بالعرض لتلعب',
+            hudBank: 'العملات',
+            hudLevel: 'المرحلة',
+            aimTitle: 'زاوية القفزة وقوتها',
+            aimAngle: 'الزاوية:',
+            aimPower: 'القوة:',
+            storeBtn: '🐸 متجر الضفادع',
+            restartTitle: 'إعادة المرحلة',
+            restartLabel: 'من جديد',
+            controlsTitle: 'إظهار / إخفاء أزرار التحكم',
+            soundTitle: 'تشغيل / إيقاف الصوت',
+            keyRight: 'أخفض', keyRightTitle: 'اجعل السهم أخفض (يمين)',
+            keyUp: 'أقوى +', keyUpTitle: 'سهم أطول: قفزة أقوى (أعلى)',
+            keyDown: 'أخف -', keyDownTitle: 'سهم أقصر: قفزة أخف (أسفل)',
+            keyLeft: 'أعلى', keyLeftTitle: 'اجعل السهم أعلى (يسار)',
+            jumpBtn: '🦘 اقفز! (مسافة)',
+            homePlay: '▶ العب',
+            homeStore: '🐸 المتجر',
+            homeSettings: '⚙️ الإعدادات',
+            startSign: 'البداية',
+            firstHint: '👆 اسحب للخلف من الضفدع ثم اترك لتقفز!',
+            settingsTitle: '⚙️ الإعدادات',
+            settingsLanguage: 'اللغة',
+            settingsSound: 'الأصوات',
+            soundOn: '🔊 تشغيل',
+            soundOff: '🔇 إيقاف',
+            closeBtn: '✖️ إغلاق',
+            exitTitle: 'هل تريد الخروج من اللعبة؟',
+            exitYes: 'نعم، اخرج',
+            exitNo: 'تابع اللعب',
+            winTitle: (n) => `🎉 أكملت المرحلة ${n}!`,
+            winDesc: 'عبر الضفدع البركة وأخذ عملة العلم الكبيرة (10)!',
+            winCoins: 'عملات المرحلة',
+            winJumps: 'القفزات',
+            winBank: 'مجموع العملات',
+            nextLevel: '⬅️ المرحلة التالية',
+            storeTitle: '🐸 متجر الضفادع',
+            storeSubtitle: 'افتح ضفادع وألوانًا وإكسسوارات جديدة!',
+            storeBank: 'العملات:',
+            previewTitle: 'معاينة',
+            tabFrogs: '🐸 الضفادع',
+            tabColors: '🎨 الألوان',
+            tabAccessories: '👑 الإكسسوارات',
+            colorSub: 'لون مميز لضفدعك',
+            equipped: '✅ مستخدم',
+            choose: 'اختر',
+            toastFrog: (name) => `استمتع بـ${name}!`,
+            toastColor: (name) => `ضفدعك الآن بلون ${name}!`,
+            toastAccessory: (name) => `حصلت على ${name}!`,
+            controlsShown: 'أزرار التحكم ظاهرة',
+            controlsHidden: 'أُخفيت أزرار التحكم: اسحب للخلف لتقفز',
+            frogs: {
+                starter_gray: ['الضفدع الرمادي', 'الضفدع المرسوم الأول'],
+                male_frog: ['الضفدع الولد', 'رياضي وقوي مع ربطة عنق فراشة'],
+                female_frog: ['الضفدعة البنت', 'رموش طويلة وخدود وردية وزهرة'],
+                prince_frog: ['الضفدع الأمير', 'وشاح ملكي وتاج ذهبي صغير'],
+                king_frog: ['الضفدع الملك', 'عباءة ملكية وتاج كبير وهالة ذهبية']
+            },
+            colors: { gray: 'رمادي الرسم', green: 'أخضر الغابة', blue: 'أزرق الماء', red: 'أحمر الفراولة', purple: 'بنفسجي ملكي', gold: 'ذهبي لامع' },
+            accessories: {
+                none: ['بدون إكسسوار', 'المظهر الطبيعي'],
+                party_hat: ['قبعة الحفلة', 'قبعة ملونة مع كرة صوف'],
+                sunglasses: ['نظارة شمسية', 'نظارة داكنة أنيقة'],
+                pirate_hat: ['قبعة القرصان', 'قبعة قبطان بحري حقيقي'],
+                hero_cape: ['عباءة البطل', 'عباءة حمراء ترفرف في الهواء'],
+                royal_crown: ['التاج الملكي', 'تاج ذهبي مرصع بالجواهر']
+            }
+        },
+        es: {
+            pageTitle: 'La Rana Saltarina',
+            gameTitle: 'La Rana Saltarina',
+            rotateHint: 'Gira el teléfono de lado para jugar',
+            hudBank: 'Monedas',
+            hudLevel: 'Nivel',
+            aimTitle: 'Ángulo y fuerza del salto',
+            aimAngle: 'Ángulo:',
+            aimPower: 'Fuerza:',
+            storeBtn: '🐸 Tienda de ranas',
+            restartTitle: 'Reiniciar nivel',
+            restartLabel: 'Reiniciar',
+            controlsTitle: 'Mostrar / ocultar botones',
+            soundTitle: 'Sonido sí / no',
+            keyRight: 'Más bajo', keyRightTitle: 'Baja la flecha (derecha)',
+            keyUp: 'Más fuerte +', keyUpTitle: 'Flecha más larga: salto más fuerte (arriba)',
+            keyDown: 'Más suave -', keyDownTitle: 'Flecha más corta: salto más suave (abajo)',
+            keyLeft: 'Más alto', keyLeftTitle: 'Sube la flecha (izquierda)',
+            jumpBtn: '🦘 ¡Salta! (Espacio)',
+            homePlay: '▶ Jugar',
+            homeStore: '🐸 Tienda',
+            homeSettings: '⚙️ Ajustes',
+            startSign: 'Salida',
+            firstHint: '👆 ¡Tira hacia atrás desde la rana y suelta para saltar!',
+            settingsTitle: '⚙️ Ajustes',
+            settingsLanguage: 'Idioma',
+            settingsSound: 'Sonidos',
+            soundOn: '🔊 Sí',
+            soundOff: '🔇 No',
+            closeBtn: '✖️ Cerrar',
+            exitTitle: '¿Salir del juego?',
+            exitYes: 'Sí, salir',
+            exitNo: 'Seguir jugando',
+            winTitle: (n) => `🎉 ¡Nivel ${n} completado!`,
+            winDesc: '¡La rana cruzó el estanque y atrapó la gran moneda de la bandera (10)!',
+            winCoins: 'Monedas del nivel',
+            winJumps: 'Saltos',
+            winBank: 'Monedas en total',
+            nextLevel: '➡️ Siguiente nivel',
+            storeTitle: '🐸 Tienda de ranas',
+            storeSubtitle: '¡Desbloquea nuevas ranas, colores y accesorios!',
+            storeBank: 'Monedas:',
+            previewTitle: 'Vista previa',
+            tabFrogs: '🐸 Ranas',
+            tabColors: '🎨 Colores',
+            tabAccessories: '👑 Accesorios',
+            colorSub: 'Un color especial para tu rana',
+            equipped: '✅ En uso',
+            choose: 'Elegir',
+            toastFrog: (name) => `¡Disfruta de tu ${name}!`,
+            toastColor: (name) => `¡Tu rana ahora es ${name}!`,
+            toastAccessory: (name) => `¡Conseguiste: ${name}!`,
+            controlsShown: 'Botones de control activados',
+            controlsHidden: 'Botones ocultos: tira hacia atrás para saltar',
+            frogs: {
+                starter_gray: ['Rana Gris', 'La rana dibujada del principio'],
+                male_frog: ['Rana Niño', 'Deportista y fuerte, con pajarita'],
+                female_frog: ['Rana Niña', 'Pestañas largas, mejillas rosas y una flor'],
+                prince_frog: ['Rana Príncipe', 'Una banda real y una pequeña diadema de oro'],
+                king_frog: ['Rana Rey', 'Capa real, gran corona y un brillo dorado']
+            },
+            colors: { gray: 'Gris Lápiz', green: 'Verde Bosque', blue: 'Azul Agua', red: 'Rojo Fresa', purple: 'Morado Real', gold: 'Oro Brillante' },
+            accessories: {
+                none: ['Sin accesorio', 'El estilo natural'],
+                party_hat: ['Gorro de fiesta', 'Un gorro de colores con pompón'],
+                sunglasses: ['Gafas de sol', 'Gafas oscuras con estilo'],
+                pirate_hat: ['Sombrero pirata', 'El sombrero de un capitán de mar'],
+                hero_cape: ['Capa de héroe', 'Una capa roja que ondea al viento'],
+                royal_crown: ['Corona real', 'Una corona de oro con joyas']
+            }
+        },
+        fr: {
+            pageTitle: 'La Grenouille Sauteuse',
+            gameTitle: 'La Grenouille Sauteuse',
+            rotateHint: 'Tourne ton téléphone sur le côté pour jouer',
+            hudBank: 'Pièces',
+            hudLevel: 'Niveau',
+            aimTitle: 'Angle et force du saut',
+            aimAngle: 'Angle :',
+            aimPower: 'Force :',
+            storeBtn: '🐸 Boutique',
+            restartTitle: 'Recommencer le niveau',
+            restartLabel: 'Recommencer',
+            controlsTitle: 'Afficher / masquer les boutons',
+            soundTitle: 'Son activé / coupé',
+            keyRight: 'Plus bas', keyRightTitle: 'Baisser la flèche (droite)',
+            keyUp: 'Plus fort +', keyUpTitle: 'Flèche plus longue : saut plus fort (haut)',
+            keyDown: 'Plus doux -', keyDownTitle: 'Flèche plus courte : saut plus doux (bas)',
+            keyLeft: 'Plus haut', keyLeftTitle: 'Monter la flèche (gauche)',
+            jumpBtn: '🦘 Saute ! (Espace)',
+            homePlay: '▶ Jouer',
+            homeStore: '🐸 Boutique',
+            homeSettings: '⚙️ Réglages',
+            startSign: 'Départ',
+            firstHint: '👆 Tire en arrière depuis la grenouille et lâche pour sauter !',
+            settingsTitle: '⚙️ Réglages',
+            settingsLanguage: 'Langue',
+            settingsSound: 'Sons',
+            soundOn: '🔊 Activés',
+            soundOff: '🔇 Coupés',
+            closeBtn: '✖️ Fermer',
+            exitTitle: 'Quitter le jeu ?',
+            exitYes: 'Oui, quitter',
+            exitNo: 'Continuer à jouer',
+            winTitle: (n) => `🎉 Niveau ${n} terminé !`,
+            winDesc: 'La grenouille a traversé la mare et attrapé la grosse pièce du drapeau (10) !',
+            winCoins: 'Pièces du niveau',
+            winJumps: 'Sauts',
+            winBank: 'Total des pièces',
+            nextLevel: '➡️ Niveau suivant',
+            storeTitle: '🐸 Boutique des grenouilles',
+            storeSubtitle: 'Débloque de nouvelles grenouilles, couleurs et accessoires !',
+            storeBank: 'Pièces :',
+            previewTitle: 'Aperçu',
+            tabFrogs: '🐸 Grenouilles',
+            tabColors: '🎨 Couleurs',
+            tabAccessories: '👑 Accessoires',
+            colorSub: 'Une couleur spéciale pour ta grenouille',
+            equipped: '✅ Utilisé',
+            choose: 'Choisir',
+            toastFrog: (name) => `Profite de ta ${name} !`,
+            toastColor: (name) => `Ta grenouille est maintenant ${name} !`,
+            toastAccessory: (name) => `Tu as obtenu : ${name} !`,
+            controlsShown: 'Boutons de contrôle affichés',
+            controlsHidden: 'Boutons masqués : tire en arrière pour sauter',
+            frogs: {
+                starter_gray: ['Grenouille Grise', 'La grenouille dessinée du début'],
+                male_frog: ['Grenouille Garçon', 'Sportif et fort, avec un nœud papillon'],
+                female_frog: ['Grenouille Fille', 'Longs cils, joues roses et une fleur'],
+                prince_frog: ['Grenouille Prince', 'Une écharpe royale et un petit diadème d’or'],
+                king_frog: ['Grenouille Roi', 'Cape royale, grande couronne et halo doré']
+            },
+            colors: { gray: 'Gris Crayon', green: 'Vert Forêt', blue: 'Bleu Eau', red: 'Rouge Fraise', purple: 'Violet Royal', gold: 'Or Brillant' },
+            accessories: {
+                none: ['Sans accessoire', 'Le style naturel'],
+                party_hat: ['Chapeau de fête', 'Un chapeau coloré avec un pompon'],
+                sunglasses: ['Lunettes de soleil', 'Des lunettes noires stylées'],
+                pirate_hat: ['Chapeau de pirate', 'Le chapeau d’un vrai capitaine'],
+                hero_cape: ['Cape de héros', 'Une cape rouge qui flotte au vent'],
+                royal_crown: ['Couronne royale', 'Une couronne d’or ornée de joyaux']
+            }
+        }
+    };
+
+    function detectLanguage() {
+        try {
+            const langs = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || 'en'];
+            for (const l of langs) {
+                const code = String(l).toLowerCase().slice(0, 2);
+                if (code === 'iw') return 'he';
+                if (I18N[code]) return code;
+            }
+        } catch (e) {}
+        return 'en';
+    }
+
+    // t('key') → המחרוזת בשפה הנוכחית (נופל לאנגלית אם חסר); פונקציות מקבלות פרמטרים
+    function t(key, ...args) {
+        const dict = I18N[progress.language] || I18N.en;
+        const v = dict[key] !== undefined ? dict[key] : I18N.en[key];
+        return typeof v === 'function' ? v(...args) : v;
+    }
+    const frogName = (item) => ((I18N[progress.language] || I18N.en).frogs[item.id] || [item.name])[0];
+    const frogDesc = (item) => ((I18N[progress.language] || I18N.en).frogs[item.id] || [, item.desc])[1];
+    const colorName = (item) => (I18N[progress.language] || I18N.en).colors[item.id] || item.name;
+    const accName = (item) => ((I18N[progress.language] || I18N.en).accessories[item.id] || [item.name])[0];
+    const accDesc = (item) => ((I18N[progress.language] || I18N.en).accessories[item.id] || [, item.desc])[1];
+
     // =========================================================================
     // 3. שמירה מקומית (localStorage)
     // =========================================================================
@@ -1010,7 +1494,10 @@
                     equippedFrog: data.equippedFrog || 'starter_gray',
                     equippedColor: data.equippedColor || 'gray',
                     equippedAccessory: data.equippedAccessory || 'none',
-                    showButtons: data.showButtons === true
+                    showButtons: data.showButtons === true,
+                    language: I18N[data.language] ? data.language : detectLanguage(),
+                    muted: data.muted === true,
+                    seenHint: data.seenHint === true || (Number(data.level) || 1) > 1
                 };
             }
         } catch (e) {
@@ -1025,7 +1512,10 @@
             equippedFrog: 'starter_gray',
             equippedColor: 'gray',
             equippedAccessory: 'none',
-            showButtons: false
+            showButtons: false,
+            language: detectLanguage(),
+            muted: false,
+            seenHint: false
         };
     }
 
@@ -1055,17 +1545,20 @@
     // מצבי משחק: 'START' | 'AIMING' | 'JUMPING' | 'SPLASHING' | 'WIN' | 'STORE'
     let state = 'START';
     let stateBeforeStore = 'AIMING';
+    let stateBeforeSettings = 'START';
+    let lastCompletedLevel = 1;
+    let homeVisible = true;
 
     // קבועי פיזיקה
     const GRAVITY = 980;
     const MIN_ANGLE_DEG = 14;  // הכי שטוח ימינה
     const MAX_ANGLE_DEG = 78;  // הכי תלול שמאלה/למעלה
     const MIN_POWER = 320;
-    const MAX_POWER = 920;
+    const MAX_POWER = 620;   // משיכה מלאה ≈ קצת פחות משני עלים (920 ו-700 היו חזקים מדי בטלפון)
 
     // כיוון ועוצמת החץ
     let aimAngleDeg = 42;
-    let aimPower = 610;
+    let aimPower = 420;
 
     // מצב קלט רציף (לחיצה ממושכת על החצים)
     const keysHeld = { left: false, right: false, up: false, down: false };
@@ -1294,27 +1787,26 @@
     // 6. ממשק משתמש והודעות
     // =========================================================================
     let toastTimeout = null;
-    function showToast(text) {
+    function showToast(text, ms = 2000) {
         const el = document.getElementById('toast');
         el.textContent = text;
         el.classList.add('visible');
         clearTimeout(toastTimeout);
-        toastTimeout = setTimeout(() => el.classList.remove('visible'), 2000);
+        toastTimeout = setTimeout(() => el.classList.remove('visible'), ms);
     }
 
     function updateHUD() {
         document.getElementById('hud-coins').textContent = progress.coins;
         document.getElementById('hud-level').textContent = progress.level;
+        document.getElementById('home-level').textContent = progress.level;
+        document.getElementById('home-coins').textContent = progress.coins;
         document.getElementById('hud-angle').textContent = `${Math.round(aimAngleDeg)}°`;
         const powerPct = Math.round(((aimPower - MIN_POWER) / (MAX_POWER - MIN_POWER)) * 100);
         document.getElementById('hud-power').textContent = `${powerPct}%`;
     }
 
     function performJump() {
-        if (state === 'START') {
-            document.getElementById('start-overlay').classList.add('hidden');
-            state = 'AIMING';
-        }
+        if (state === 'START') startPlaying();
         if (state !== 'AIMING') return;
 
         audio.ensure();
@@ -1345,7 +1837,8 @@
         if (jumpsCount <= optimalJumps + 1) stars = '★★★';
         else if (jumpsCount <= optimalJumps + 4) stars = '★★☆';
 
-        document.getElementById('win-title').textContent = `🎉 שלב ${completedLevel} הושלם!`;
+        lastCompletedLevel = completedLevel;
+        document.getElementById('win-title').textContent = t('winTitle', completedLevel);
         document.getElementById('win-stars').textContent = stars;
         document.getElementById('win-level-coins').textContent = `+${levelCoinsCollected}`;
         document.getElementById('win-jumps').textContent = jumpsCount;
@@ -1392,7 +1885,7 @@
         const cSpec = COLORS_CATALOG.find(c => c.id === progress.equippedColor) || COLORS_CATALOG[0];
         const aSpec = ACCESSORIES_CATALOG.find(a => a.id === progress.equippedAccessory) || ACCESSORIES_CATALOG[0];
         document.getElementById('preview-caption').textContent =
-            `${fSpec.name} • ${cSpec.name}` + (aSpec.id !== 'none' ? ` • ${aSpec.name}` : '');
+            `${frogName(fSpec)} • ${colorName(cSpec)}` + (aSpec.id !== 'none' ? ` • ${accName(aSpec)}` : '');
 
         const container = document.getElementById('store-items-container');
         container.innerHTML = '';
@@ -1403,8 +1896,8 @@
                 const equipped = progress.equippedFrog === item.id;
                 container.appendChild(buildItemCard({
                     iconHtml: `<div class="item-icon" style="background:#fff3b0;">${item.icon}</div>`,
-                    title: item.name,
-                    sub: item.desc,
+                    title: frogName(item),
+                    sub: frogDesc(item),
                     owned,
                     equipped,
                     price: item.price,
@@ -1421,7 +1914,7 @@
                             saveProgress();
                             updateHUD();
                             audio.playCoin(5);
-                            showToast(`תתחדשו על ${item.name}!`);
+                            showToast(t('toastFrog', frogName(item)));
                             renderStore();
                         }
                     }
@@ -1433,8 +1926,8 @@
                 const equipped = progress.equippedColor === item.id;
                 container.appendChild(buildItemCard({
                     iconHtml: `<div class="item-icon" style="background:${item.body};">🎨</div>`,
-                    title: item.name,
-                    sub: 'צבע מיוחד לצפרדע',
+                    title: colorName(item),
+                    sub: t('colorSub'),
                     owned,
                     equipped,
                     price: item.price,
@@ -1451,7 +1944,7 @@
                             saveProgress();
                             updateHUD();
                             audio.playCoin(5);
-                            showToast(`הצפרדע נצבעה ב${item.name}!`);
+                            showToast(t('toastColor', colorName(item)));
                             renderStore();
                         }
                     }
@@ -1463,8 +1956,8 @@
                 const equipped = progress.equippedAccessory === item.id;
                 container.appendChild(buildItemCard({
                     iconHtml: `<div class="item-icon" style="background:#e0f2fe;">${item.icon}</div>`,
-                    title: item.name,
-                    sub: item.desc,
+                    title: accName(item),
+                    sub: accDesc(item),
                     owned,
                     equipped,
                     price: item.price,
@@ -1481,7 +1974,7 @@
                             saveProgress();
                             updateHUD();
                             audio.playCoin(5);
-                            showToast(`האביזר "${item.name}" נרכש!`);
+                            showToast(t('toastAccessory', accName(item)));
                             renderStore();
                         }
                     }
@@ -1499,10 +1992,10 @@
         let disabled = false;
 
         if (equipped) {
-            btnText = '✅ בשימוש';
+            btnText = t('equipped');
             btnClass += ' green';
         } else if (owned) {
-            btnText = 'בחר';
+            btnText = t('choose');
         } else if (progress.coins < price) {
             disabled = true;
         }
@@ -1556,6 +2049,8 @@
             }
         } else if (e.code === 'Escape' && state === 'STORE') {
             closeStore();
+        } else if (e.code === 'Escape' && state === 'SETTINGS') {
+            closeSettings();
         }
     });
 
@@ -1699,11 +2194,7 @@
         performJump();
     });
 
-    document.getElementById('btn-start-game').addEventListener('click', () => {
-        audio.ensure();
-        document.getElementById('start-overlay').classList.add('hidden');
-        state = 'AIMING';
-    });
+    document.getElementById('btn-start-game').addEventListener('click', startPlaying);
 
     document.getElementById('btn-next-level').addEventListener('click', () => {
         document.getElementById('win-overlay').classList.add('hidden');
@@ -1715,6 +2206,45 @@
         buildLevel(progress.level);
         if (state !== 'START') state = 'AIMING';
     });
+
+    // ---- כפתור "חזור" של אנדרואיד (רק באפליקציה): תמיד צעד אחד אחורה ----
+    const AppPlugin = (() => {
+        try {
+            const C = window.Capacitor;
+            if (!C || !C.isNativePlatform || !C.isNativePlatform()) return null;
+            if (C.isPluginAvailable && !C.isPluginAvailable('App')) return null;
+            return C.registerPlugin ? C.registerPlugin('App') : (C.Plugins && C.Plugins.App);
+        } catch (e) { return null; }
+    })();
+    const exitOverlay = document.getElementById('exit-overlay');
+    document.getElementById('btn-exit-no').addEventListener('click', () => exitOverlay.classList.add('hidden'));
+    document.getElementById('btn-exit-yes').addEventListener('click', () => {
+        exitOverlay.classList.add('hidden');
+        saveProgress();
+        if (AppPlugin) AppPlugin.exitApp();
+    });
+    function handleBack() {
+        if (!exitOverlay.classList.contains('hidden')) { exitOverlay.classList.add('hidden'); return; }
+        switch (state) {
+            case 'STORE': closeStore(); return;
+            case 'SETTINGS': closeSettings(); return;
+            case 'AIMING':
+                // back to the start screen; the level stays as it is
+                sling = null;
+                state = 'START';
+                document.getElementById('start-overlay').classList.remove('hidden');
+                return;
+            case 'JUMPING': case 'SPLASHING': return; // let the jump finish first
+            case 'WIN':
+                document.getElementById('win-overlay').classList.add('hidden');
+                buildLevel(progress.level);
+                state = 'START';
+                document.getElementById('start-overlay').classList.remove('hidden');
+                return;
+            default: exitOverlay.classList.remove('hidden');
+        }
+    }
+    if (AppPlugin) AppPlugin.addListener('backButton', handleBack);
 
     document.getElementById('btn-open-store').addEventListener('click', openStore);
     document.getElementById('btn-start-store').addEventListener('click', openStore);
@@ -1740,13 +2270,124 @@
         progress.showButtons = !progress.showButtons;
         saveProgress();
         applyButtonsSetting();
-        showToast(progress.showButtons ? 'כפתורי השליטה מוצגים' : 'כפתורי השליטה הוסתרו — משכו כדי לקפוץ');
+        showToast(progress.showButtons ? t('controlsShown') : t('controlsHidden'));
     });
 
-    document.getElementById('btn-sound').addEventListener('click', () => {
-        const muted = audio.toggleMute();
-        document.getElementById('btn-sound').textContent = muted ? '🔇' : '🔊';
-    });
+    // ---- צליל (נשמר) ----
+    function setMuted(m) {
+        audio.muted = !!m;
+        progress.muted = !!m;
+        saveProgress();
+        renderSoundButtons();
+    }
+    function renderSoundButtons() {
+        document.getElementById('btn-sound').textContent = audio.muted ? '🔇' : '🔊';
+        document.getElementById('btn-settings-sound').textContent = audio.muted ? t('soundOff') : t('soundOn');
+    }
+    audio.muted = !!progress.muted;
+    document.getElementById('btn-sound').addEventListener('click', () => setMuted(!audio.muted));
+    document.getElementById('btn-settings-sound').addEventListener('click', () => { setMuted(!audio.muted); audio.ensure(); audio.playLand(); });
+
+    // =========================================================================
+    // 8ב. שפה, מסך הבית והגדרות
+    // =========================================================================
+    function applyLanguage() {
+        const meta = LANGUAGES.find(l => l.code === progress.language) || LANGUAGES[1];
+        document.documentElement.lang = meta.code;
+        document.documentElement.dir = meta.dir;
+        document.title = t('pageTitle');
+        document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+        document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = t(el.dataset.i18nTitle); });
+        document.getElementById('win-title').textContent = t('winTitle', lastCompletedLevel);
+        renderLangOptions();
+        renderSoundButtons();
+        renderStore();
+        layoutHomeButtons();
+    }
+
+    function renderLangOptions() {
+        const box = document.getElementById('lang-options');
+        box.innerHTML = '';
+        LANGUAGES.forEach(l => {
+            const b = document.createElement('button');
+            b.className = 'sketch-btn' + (l.code === progress.language ? ' active' : '');
+            b.textContent = `${l.flag} ${l.name}`;
+            b.addEventListener('click', () => {
+                progress.language = l.code;
+                saveProgress();
+                applyLanguage();
+            });
+            box.appendChild(b);
+        });
+    }
+
+    // מיקום העלים במסך הבית (בפיקסלים של המסך), מותאם לגודל המסך
+    function homeLayout() {
+        const s = Math.max(0.8, Math.min(1.7, Math.min(W / 760, H / 340)));
+        const cx = W / 2;
+        const spread = Math.min(200 * s, W / 2 - 64 * s);
+        const lift = Math.max(0, (H - 360 * s) * 0.35); // מסכים גבוהים (טאבלט): מעלים קצת את הסצנה
+        return {
+            s,
+            play: { x: cx, y: H - 86 * s - lift, rx: 88 * s },
+            store: { x: cx - spread, y: H - 66 * s - lift, rx: 48 * s },
+            settings: { x: cx + spread, y: H - 66 * s - lift, rx: 48 * s }
+        };
+    }
+
+    function layoutHomeButtons() {
+        const L = homeLayout();
+        document.getElementById('start-overlay').style.setProperty('--hs', L.s.toFixed(3));
+        const place = (id, p, top) => {
+            const el = document.getElementById(id);
+            el.style.left = `${p.x - p.rx}px`;
+            el.style.width = `${p.rx * 2}px`;
+            el.style.top = `${top}px`;
+            el.style.height = `${p.y + p.rx * 0.5 + 10 * L.s - top}px`;
+        };
+        place('btn-start-game', L.play, L.play.y - 120 * L.s);
+        place('btn-start-store', L.store, L.store.y - L.store.rx * 0.6);
+        place('btn-open-settings', L.settings, L.settings.y - L.settings.rx * 0.6);
+    }
+
+    function drawHomeScene() {
+        const L = homeLayout();
+        const pad = (p, notch) => ({ x: p.x, y: p.y, rx: p.rx, ry: p.rx * 0.5, notchAngle: notch, coin: 0, coinCollected: true, isGoal: false, phase: 0 });
+        drawLilyPad(pad(L.store, 0.5));
+        drawLilyPad(pad(L.settings, 2.6));
+        drawLilyPad(pad(L.play, 0.3));
+        drawFrogCharacter(ctx, L.play.x, L.play.y - 28 * L.s, 1, 1, 2.1 * L.s);
+    }
+
+    function startPlaying() {
+        audio.ensure();
+        document.getElementById('start-overlay').classList.add('hidden');
+        state = 'AIMING';
+        if (!progress.seenHint) {
+            progress.seenHint = true;
+            saveProgress();
+            showToast(t('firstHint'), 4500);
+        }
+    }
+
+    function openSettings() {
+        if (state !== 'SETTINGS') stateBeforeSettings = state;
+        state = 'SETTINGS';
+        document.getElementById('start-overlay').classList.add('hidden');
+        renderLangOptions();
+        renderSoundButtons();
+        document.getElementById('settings-overlay').classList.remove('hidden');
+    }
+
+    function closeSettings() {
+        document.getElementById('settings-overlay').classList.add('hidden');
+        state = stateBeforeSettings === 'SETTINGS' ? 'START' : stateBeforeSettings;
+        if (state === 'START') document.getElementById('start-overlay').classList.remove('hidden');
+    }
+
+    document.getElementById('btn-open-settings').addEventListener('click', openSettings);
+    document.getElementById('btn-close-settings').addEventListener('click', closeSettings);
+    window.addEventListener('resize', layoutHomeButtons);
 
     // =========================================================================
     // 9. עדכון פיזיקה ואנימציה
@@ -1970,6 +2611,11 @@
         g.lineTo(0, top + 14);
         g.closePath();
         g.fill();
+        // קו דיו רק לאורך קו הגבעות (לא בשולי המסך)
+        g.beginPath();
+        g.moveTo(0, hillY(0));
+        for (let x = 0; x <= w; x += 24) g.lineTo(x, hillY(x));
+        g.lineTo(w, hillY(w));
         g.stroke();
 
         // עצים עגולים על הגבעות
@@ -2060,7 +2706,12 @@
         ctx.closePath();
         ctx.fill();
 
-        // הילה בהירה בקו שפת המים
+        // הילה בהירה בקו שפת המים בלבד (לא סביב שולי המסך)
+        ctx.beginPath();
+        for (let x = 0; x <= W + 40; x += 40) {
+            const waveY = waterTop + Math.sin((x + cameraX) * 0.015 + timeElapsed * 1.4) * 6;
+            if (x === 0) ctx.moveTo(x, waveY); else ctx.lineTo(x, waveY);
+        }
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
         ctx.lineWidth = 4;
         ctx.stroke();
@@ -2080,7 +2731,7 @@
         });
 
         // שלט עץ "התחל" בפינה השמאלית התחתונה (בהשראת הציור)
-        drawStartWoodenSign(72, H - 56);
+        if (!homeVisible) drawStartWoodenSign(72, H - 56);
         ctx.restore();
     }
 
@@ -2107,7 +2758,7 @@
         ctx.font = '800 15px "Rubik", sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('התחל', 0, -10);
+        ctx.fillText(t('startSign'), 0, -10);
         ctx.restore();
     }
 
@@ -2564,15 +3215,23 @@
     }
 
     function render() {
+        homeVisible = state === 'START' || state === 'SETTINGS' || (state === 'STORE' && stateBeforeStore === 'START');
+        frameEl.classList.toggle('at-home', homeVisible);
         drawWatercolorPond();
 
         ctx.save();
         ctx.translate(-cameraX, 0);
 
-        lilyPads.forEach(drawLilyPad);
-        drawAimingArrow();
-        drawFrogCharacter(ctx, frog.x, frog.y, frog.squashX, frog.squashY, 1);
-        drawSplashAndPopups();
+        if (homeVisible) {
+            ctx.restore();
+            ctx.save();
+            drawHomeScene();
+        } else {
+            lilyPads.forEach(drawLilyPad);
+            drawAimingArrow();
+            drawFrogCharacter(ctx, frog.x, frog.y, frog.squashX, frog.squashY, 1);
+            drawSplashAndPopups();
+        }
 
         ctx.restore();
         drawSlingOverlay();
@@ -2592,9 +3251,12 @@
         requestAnimationFrame(loop);
     }
 
+    const frameEl = document.getElementById('game-frame');
     window.onload = () => {
         resize();
         buildLevel(progress.level);
+        applyLanguage();
+        updateHUD();
         requestAnimationFrame(loop);
     };
 })();

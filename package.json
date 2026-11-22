@@ -1,0 +1,24 @@
+{
+  "name": "jumping-frog",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Jumping Frog: a hand-drawn kids game. Slingshot a frog across lily pads to the flag.",
+  "scripts": {
+    "build:www": "rm -rf www && mkdir -p www && cp -R fonts www/fonts && cp node_modules/@capacitor/core/dist/capacitor.js www/capacitor.js && sed 's#<script>#<script src=\"capacitor.js\"></script>\\n<script>#' index.html > www/index.html",
+    "serve": "npx --yes http-server . -p 8080 -c-1",
+    "sync": "npm run build:www && npx cap sync",
+    "android": "npm run sync && npx cap open android"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EliShayGH/jumping-frog.git"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.6.2",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/core": "^8.6.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.6.2"
+  }
+}
