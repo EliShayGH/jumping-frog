@@ -9,6 +9,8 @@
 
 ## 2. Core Gameplay Mechanics
 
+* **Touch slingshot (primary control, Phase 1):** `pointerdown` on the canvas grabs the frog (within `SLING_GRAB_RADIUS`) or anchors anywhere on the pond. Pull direction sets the angle, pull length sets `aimPower` (up to `slingMaxPull()`); pulls shorter than `SLING_DEADZONE` cancel on release. `applySlingAim()` recalculates every frame so drifting pads don't skew aim; `drawSlingOverlay()` draws the rubber band / start ring. Works with mouse too.
+* **Optional buttons:** the arrow/jump buttons are hidden unless `progress.showButtons` (toggled by the 🎮 HUD button, saved).
 * **Aiming & Trajectory Arrow (`drawAimingArrow`):**
   * **Up (`↑` / `W` / On-screen `חזק +`):** Increases jump power (`aimPower`), lengthening the colored trajectory arrow and extending the parabolic preview dots.
   * **Down (`↓` / `S` / On-screen `חלש -`):** Decreases jump power, shortening the arrow for closer lily pads.
@@ -18,6 +20,7 @@
 * **Lily Pads, Hazards & Camera:**
   * Landing safely on a green lily pad restores jumping and updates `frog.safePadIndex`.
   * Missing a lily pad triggers a water splash (`triggerSplash()`) and returns the frog to the last safe lily pad without losing progress.
+  * Pads store `ny` (relative height in the water) so `resize()` keeps them in place on rotation.
   * Higher levels (`level >= 3`) introduce gently drifting lily pads (`moveAmpY`, `moveAmpX`) and wider horizontal camera scrolling (`cameraX`).
 * **Coins & Goal Flag:**
   * Intermediate and bonus side lily pads hold **`1`** or **`5`** coins.
@@ -36,6 +39,8 @@
 * `index.html` — Complete game source code (downloaded from `jumping-frog.html` and renamed to `index.html` for GitHub Pages).
 * `README.md` — Hebrew/English player & repository guide.
 * `HANDOFF.md` — This technical context file for future development sessions.
+* `fonts/` — Bundled Rubik (Hebrew/Latin/Arabic) and Assistant woff2 files + their OFL licenses; no network fonts.
+* `NEW_GAME_PLAYBOOK.md` lives with Sketch Bird; this project follows it (Phase 1 in progress: Android wrapper still pending, waiting on the final game name).
 
 ## 5. Key Functions & Systems in `index.html`
 
