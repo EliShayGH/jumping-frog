@@ -630,7 +630,6 @@
             padding: 3px 12px;
             font-weight: 800;
             font-size: 0.95rem;
-            direction: ltr;
             white-space: nowrap;
         }
 
@@ -668,6 +667,51 @@
             box-shadow: 3px 3px 0 var(--ink);
         }
         .home-pad:active .home-tag { transform: translateX(-50%) translateY(2px) scale(0.97); }
+
+        #home-lang {
+            position: absolute;
+            top: 10px;
+            inset-inline-start: max(14px, env(safe-area-inset-left), env(safe-area-inset-right));
+            z-index: 3;
+        }
+        #btn-home-lang {
+            width: 46px;
+            height: 46px;
+            padding: 0;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+        #home-lang-menu {
+            position: absolute;
+            top: 54px;
+            inset-inline-start: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 6px;
+            min-width: 150px;
+        }
+        #home-lang-menu.hidden { display: none; }
+        #home-lang-menu button {
+            font-family: inherit;
+            font-weight: 800;
+            font-size: 0.95rem;
+            text-align: start;
+            padding: 5px 10px;
+            border: 2px solid transparent;
+            border-radius: 10px;
+            background: transparent;
+            color: var(--ink);
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        #home-lang-menu button.active { background: var(--gold-light); border-color: var(--ink); }
+
+        /* חנות: נסו לפני שקונים */
+        .item-card { cursor: pointer; }
+        .item-card.previewing { background: #e0f2fe; border-color: #0284c7; }
+        .try-hint { font-size: 0.74rem; color: var(--ink-soft); font-weight: 700; }
 
         /* ===== הגדרות ===== */
         .settings-modal { max-width: 600px; gap: 12px; }
@@ -783,7 +827,11 @@
          העלים והצפרדע מצוירים על הקנבס (drawHomeScene); כאן רק הכותרת והכפתורים השקופים מעליהם. -->
     <div id="start-overlay" class="overlay home-layer">
         <h1 id="home-title" data-i18n="gameTitle">הצפרדע הקופצת</h1>
-        <div id="home-stats" class="sketch-card">🚩 <span id="home-level">1</span> · 🪙 <span id="home-coins">0</span></div>
+        <div id="home-lang">
+            <button class="sketch-btn" id="btn-home-lang" data-i18n-title="settingsLanguage" title="שפה"></button>
+            <div id="home-lang-menu" class="sketch-card hidden"></div>
+        </div>
+        <div id="home-stats" class="sketch-card"><span dir="ltr">🚩 <span id="home-level">1</span> · 🪙 <span id="home-coins">0</span></span></div>
         <button class="home-pad" id="btn-start-game"><span class="home-tag big" data-i18n="homePlay">▶ שחק</span></button>
         <button class="home-pad" id="btn-start-store"><span class="home-tag" data-i18n="homeStore">🐸 חנות</span></button>
         <button class="home-pad" id="btn-open-settings"><span class="home-tag" data-i18n="homeSettings">⚙️ הגדרות</span></button>
@@ -851,7 +899,7 @@
             <div class="store-top">
                 <div style="text-align:start;">
                     <h1 style="font-size:1.65rem;" data-i18n="storeTitle">🐸 חנות ועיצוב הצפרדע</h1>
-                    <p style="font-size:0.92rem;" data-i18n="storeSubtitle">שדרגו את הצפרדע האפורה לצפרדע נסיך, מלך, צבעים ואביזרים!</p>
+                    <p style="font-size:0.92rem;" data-i18n="storeSubtitle">שדרגו את הצפרדע לצפרדע נסיך, מלך, צבעים ואביזרים!</p>
                 </div>
                 <div style="display:flex; align-items:center; gap:10px;">
                     <div class="sketch-card hud-badge" style="background:var(--gold-light);">
@@ -867,6 +915,7 @@
                     <div style="font-weight:800;" data-i18n="previewTitle">תצוגה מקדימה</div>
                     <canvas id="store-preview-canvas" width="190" height="150"></canvas>
                     <div id="preview-caption" style="font-size:0.86rem; color:var(--ink-soft); font-weight:700;"></div>
+                    <div class="try-hint" data-i18n="tryOnHint">לחצו על פריט כדי לנסות אותו</div>
                 </div>
 
                 <div style="width:100%;">
@@ -1027,8 +1076,8 @@
     const FROGS_CATALOG = [
         {
             id: 'starter_gray',
-            name: 'צפרדע אפורה',
-            desc: 'הצפרדע המצוירת ההתחלתית',
+            name: 'צפרדע ירוקה',
+            desc: 'צפרדע הבריכה שמתחילה את המסע',
             price: 0,
             icon: '🐸'
         },
@@ -1063,8 +1112,8 @@
     ];
 
     const COLORS_CATALOG = [
-        { id: 'gray', name: 'אפור סקיצה', body: '#b7bcc2', belly: '#e5e7eb', spots: '#787f8a', price: 0 },
-        { id: 'green', name: 'ירוק יער', body: '#5ec94d', belly: '#d9f99d', spots: '#2f8524', price: 25 },
+        { id: 'green', name: 'ירוק יער', body: '#7dba52', belly: '#eaf2c4', spots: '#4a7a2e', price: 0 },
+        { id: 'gray', name: 'אפור סקיצה', body: '#b7bcc2', belly: '#e5e7eb', spots: '#787f8a', price: 25 },
         { id: 'blue', name: 'כחול מים', body: '#38bdf8', belly: '#e0f2fe', spots: '#0284c7', price: 25 },
         { id: 'red', name: 'אדום תות', body: '#f87171', belly: '#fee2e2', spots: '#b91c1c', price: 25 },
         { id: 'purple', name: 'סגול מלכותי', body: '#c084fc', belly: '#f3e8ff', spots: '#7e22ce', price: 25 },
@@ -1075,7 +1124,7 @@
         { id: 'none', name: 'ללא אביזר', desc: 'מראה טבעי ונקי', icon: '✨', price: 0 },
         { id: 'party_hat', name: 'כובע מסיבה', desc: 'כובע צבעוני עם פונפון', icon: '🥳', price: 20 },
         { id: 'sunglasses', name: 'משקפי שמש', desc: 'משקפיים כהים בסטייל', icon: '🕶️', price: 25 },
-        { id: 'pirate_hat', name: 'כובע פיראט', desc: 'כובע קפטן של יורדי ים', icon: '🏴‍☠️', price: 35 },
+        { id: 'pirate_hat', name: 'בנדנה של פיראט', desc: 'בנדנה אדומה שמתנופפת ברוח', icon: '🏴‍☠️', price: 35 },
         { id: 'hero_cape', name: 'גלימת גיבור', desc: 'גלימה אדומה מתנופפת', icon: '🦸', price: 40 },
         { id: 'royal_crown', name: 'כתר מלכות', desc: 'כתר זהב משובץ אבנים', icon: '👑', price: 50 }
     ];
@@ -1134,13 +1183,14 @@
             winBank: 'סה״כ בבנק',
             nextLevel: '➡️ לשלב הבא',
             storeTitle: '🐸 חנות ועיצוב הצפרדע',
-            storeSubtitle: 'שדרגו את הצפרדע האפורה לצפרדע נסיך, מלך, צבעים ואביזרים!',
+            storeSubtitle: 'שדרגו את הצפרדע לצפרדע נסיך, מלך, צבעים ואביזרים!',
             storeBank: 'בבנק:',
             previewTitle: 'תצוגה מקדימה',
             tabFrogs: '🐸 צפרדעים',
             tabColors: '🎨 צבעים',
             tabAccessories: '👑 אביזרים',
             colorSub: 'צבע מיוחד לצפרדע',
+            tryOnHint: 'לחצו על פריט כדי לנסות אותו',
             equipped: '✅ בשימוש',
             choose: 'בחר',
             toastFrog: (name) => `תתחדשו על ${name}!`,
@@ -1149,7 +1199,7 @@
             controlsShown: 'כפתורי השליטה מוצגים',
             controlsHidden: 'כפתורי השליטה הוסתרו — משכו כדי לקפוץ',
             frogs: {
-                starter_gray: ['צפרדע אפורה', 'הצפרדע המצוירת ההתחלתית'],
+                starter_gray: ['צפרדע ירוקה', 'צפרדע הבריכה שמתחילה את המסע'],
                 male_frog: ['צפרדע זכר', 'ספורטיבי וחזק עם עניבת פרפר'],
                 female_frog: ['צפרדע נקבה', 'ריסים ארוכים, לחיים ורודות ופרח'],
                 prince_frog: ['צפרדע נסיך', 'אבנט מלכותי ונזר זהב עדין'],
@@ -1160,7 +1210,7 @@
                 none: ['ללא אביזר', 'מראה טבעי ונקי'],
                 party_hat: ['כובע מסיבה', 'כובע צבעוני עם פונפון'],
                 sunglasses: ['משקפי שמש', 'משקפיים כהים בסטייל'],
-                pirate_hat: ['כובע פיראט', 'כובע קפטן של יורדי ים'],
+                pirate_hat: ['בנדנה של פיראט', 'בנדנה אדומה שמתנופפת ברוח'],
                 hero_cape: ['גלימת גיבור', 'גלימה אדומה מתנופפת'],
                 royal_crown: ['כתר מלכות', 'כתר זהב משובץ אבנים']
             }
@@ -1212,6 +1262,7 @@
             tabColors: '🎨 Colors',
             tabAccessories: '👑 Accessories',
             colorSub: 'A special color for your frog',
+            tryOnHint: 'Tap an item to try it on',
             equipped: '✅ Using',
             choose: 'Choose',
             toastFrog: (name) => `Enjoy your ${name}!`,
@@ -1220,7 +1271,7 @@
             controlsShown: 'Control buttons are on',
             controlsHidden: 'Control buttons hidden: pull back to jump',
             frogs: {
-                starter_gray: ['Gray Frog', 'The hand-drawn starter frog'],
+                starter_gray: ['Green Frog', 'The pond frog that starts the journey'],
                 male_frog: ['Boy Frog', 'Sporty and strong, with a bow tie'],
                 female_frog: ['Girl Frog', 'Long lashes, pink cheeks and a flower'],
                 prince_frog: ['Prince Frog', 'A royal sash and a little gold circlet'],
@@ -1231,7 +1282,7 @@
                 none: ['No accessory', 'The natural look'],
                 party_hat: ['Party Hat', 'A colorful hat with a pom-pom'],
                 sunglasses: ['Sunglasses', 'Cool dark shades'],
-                pirate_hat: ['Pirate Hat', 'A real sea captain’s hat'],
+                pirate_hat: ['Pirate Bandana', 'A red bandana that flaps in the wind'],
                 hero_cape: ['Hero Cape', 'A red cape that flaps in the wind'],
                 royal_crown: ['Royal Crown', 'A gold crown with jewels']
             }
@@ -1283,6 +1334,7 @@
             tabColors: '🎨 الألوان',
             tabAccessories: '👑 الإكسسوارات',
             colorSub: 'لون مميز لضفدعك',
+            tryOnHint: 'اضغط على أي غرض لتجربته',
             equipped: '✅ مستخدم',
             choose: 'اختر',
             toastFrog: (name) => `استمتع بـ${name}!`,
@@ -1291,7 +1343,7 @@
             controlsShown: 'أزرار التحكم ظاهرة',
             controlsHidden: 'أُخفيت أزرار التحكم: اسحب للخلف لتقفز',
             frogs: {
-                starter_gray: ['الضفدع الرمادي', 'الضفدع المرسوم الأول'],
+                starter_gray: ['الضفدع الأخضر', 'ضفدع البركة الذي يبدأ الرحلة'],
                 male_frog: ['الضفدع الولد', 'رياضي وقوي مع ربطة عنق فراشة'],
                 female_frog: ['الضفدعة البنت', 'رموش طويلة وخدود وردية وزهرة'],
                 prince_frog: ['الضفدع الأمير', 'وشاح ملكي وتاج ذهبي صغير'],
@@ -1302,7 +1354,7 @@
                 none: ['بدون إكسسوار', 'المظهر الطبيعي'],
                 party_hat: ['قبعة الحفلة', 'قبعة ملونة مع كرة صوف'],
                 sunglasses: ['نظارة شمسية', 'نظارة داكنة أنيقة'],
-                pirate_hat: ['قبعة القرصان', 'قبعة قبطان بحري حقيقي'],
+                pirate_hat: ['منديل القرصان', 'منديل أحمر يرفرف في الهواء'],
                 hero_cape: ['عباءة البطل', 'عباءة حمراء ترفرف في الهواء'],
                 royal_crown: ['التاج الملكي', 'تاج ذهبي مرصع بالجواهر']
             }
@@ -1354,6 +1406,7 @@
             tabColors: '🎨 Colores',
             tabAccessories: '👑 Accesorios',
             colorSub: 'Un color especial para tu rana',
+            tryOnHint: 'Toca un objeto para probarlo',
             equipped: '✅ En uso',
             choose: 'Elegir',
             toastFrog: (name) => `¡Disfruta de tu ${name}!`,
@@ -1362,7 +1415,7 @@
             controlsShown: 'Botones de control activados',
             controlsHidden: 'Botones ocultos: tira hacia atrás para saltar',
             frogs: {
-                starter_gray: ['Rana Gris', 'La rana dibujada del principio'],
+                starter_gray: ['Rana Verde', 'La rana del estanque que empieza el viaje'],
                 male_frog: ['Rana Niño', 'Deportista y fuerte, con pajarita'],
                 female_frog: ['Rana Niña', 'Pestañas largas, mejillas rosas y una flor'],
                 prince_frog: ['Rana Príncipe', 'Una banda real y una pequeña diadema de oro'],
@@ -1373,7 +1426,7 @@
                 none: ['Sin accesorio', 'El estilo natural'],
                 party_hat: ['Gorro de fiesta', 'Un gorro de colores con pompón'],
                 sunglasses: ['Gafas de sol', 'Gafas oscuras con estilo'],
-                pirate_hat: ['Sombrero pirata', 'El sombrero de un capitán de mar'],
+                pirate_hat: ['Pañuelo pirata', 'Un pañuelo rojo que ondea al viento'],
                 hero_cape: ['Capa de héroe', 'Una capa roja que ondea al viento'],
                 royal_crown: ['Corona real', 'Una corona de oro con joyas']
             }
@@ -1425,6 +1478,7 @@
             tabColors: '🎨 Couleurs',
             tabAccessories: '👑 Accessoires',
             colorSub: 'Une couleur spéciale pour ta grenouille',
+            tryOnHint: 'Touche un objet pour l’essayer',
             equipped: '✅ Utilisé',
             choose: 'Choisir',
             toastFrog: (name) => `Profite de ta ${name} !`,
@@ -1433,7 +1487,7 @@
             controlsShown: 'Boutons de contrôle affichés',
             controlsHidden: 'Boutons masqués : tire en arrière pour sauter',
             frogs: {
-                starter_gray: ['Grenouille Grise', 'La grenouille dessinée du début'],
+                starter_gray: ['Grenouille Verte', 'La grenouille de la mare qui commence l’aventure'],
                 male_frog: ['Grenouille Garçon', 'Sportif et fort, avec un nœud papillon'],
                 female_frog: ['Grenouille Fille', 'Longs cils, joues roses et une fleur'],
                 prince_frog: ['Grenouille Prince', 'Une écharpe royale et un petit diadème d’or'],
@@ -1444,7 +1498,7 @@
                 none: ['Sans accessoire', 'Le style naturel'],
                 party_hat: ['Chapeau de fête', 'Un chapeau coloré avec un pompon'],
                 sunglasses: ['Lunettes de soleil', 'Des lunettes noires stylées'],
-                pirate_hat: ['Chapeau de pirate', 'Le chapeau d’un vrai capitaine'],
+                pirate_hat: ['Bandana de pirate', 'Un bandana rouge qui flotte au vent'],
                 hero_cape: ['Cape de héros', 'Une cape rouge qui flotte au vent'],
                 royal_crown: ['Couronne royale', 'Une couronne d’or ornée de joyaux']
             }
@@ -1489,10 +1543,11 @@
                     coins: Number(data.coins) || 0,
                     level: Math.max(1, Number(data.level) || 1),
                     unlockedFrogs: Array.isArray(data.unlockedFrogs) ? data.unlockedFrogs : ['starter_gray'],
-                    unlockedColors: Array.isArray(data.unlockedColors) ? data.unlockedColors : ['gray'],
+                    unlockedColors: Array.isArray(data.unlockedColors) ? data.unlockedColors : ['green'],
                     unlockedAccessories: Array.isArray(data.unlockedAccessories) ? data.unlockedAccessories : ['none'],
                     equippedFrog: data.equippedFrog || 'starter_gray',
-                    equippedColor: data.equippedColor || 'gray',
+                    equippedColor: data.equippedColor || 'green',
+                    greenStarter: data.greenStarter === true,
                     equippedAccessory: data.equippedAccessory || 'none',
                     showButtons: data.showButtons === true,
                     language: I18N[data.language] ? data.language : detectLanguage(),
@@ -1507,10 +1562,11 @@
             coins: 0,
             level: 1,
             unlockedFrogs: ['starter_gray'],
-            unlockedColors: ['gray'],
+            unlockedColors: ['green'],
             unlockedAccessories: ['none'],
             equippedFrog: 'starter_gray',
-            equippedColor: 'gray',
+            equippedColor: 'green',
+            greenStarter: true,
             equippedAccessory: 'none',
             showButtons: false,
             language: detectLanguage(),
@@ -1520,6 +1576,12 @@
     }
 
     let progress = loadProgress();
+    // מעבר חד-פעמי: הצפרדע הירוקה היא עכשיו צבע ההתחלה החינמי (מי שכבר היה לו אפור — שומר אותו)
+    if (!progress.greenStarter) {
+        if (!progress.unlockedColors.includes('green')) progress.unlockedColors.push('green');
+        if (progress.equippedColor === 'gray') progress.equippedColor = 'green';
+        progress.greenStarter = true;
+    }
 
     function saveProgress() {
         try {
@@ -1586,9 +1648,10 @@
         vy: 0,
         currentPadIndex: 0,
         safePadIndex: 0,
-        squashX: 1,
-        squashY: 1,
-        splashTimer: 0
+        splashTimer: 0,
+        airT: 0,      // זמן מאז הזינוק (לאנימציית הרגליים)
+        vy0: 1,       // מהירות אנכית בזינוק
+        settleT: 0    // זמן שנשאר לאנימציית ההתיישבות אחרי נחיתה
     };
 
     function resize() {
@@ -1765,8 +1828,7 @@
         frog.y = lilyPads[0].y - 10;
         frog.vx = 0;
         frog.vy = 0;
-        frog.squashX = 1;
-        frog.squashY = 1;
+        frog.settleT = 0;
 
         // יצירת אדוות מים ברקע
         ripples = [];
@@ -1813,8 +1875,9 @@
         const rad = (aimAngleDeg * Math.PI) / 180;
         frog.vx = Math.cos(rad) * aimPower;
         frog.vy = -Math.sin(rad) * aimPower;
-        frog.squashX = 0.78;
-        frog.squashY = 1.28;
+        frog.vy0 = Math.max(1, -frog.vy);
+        frog.airT = 0;
+        frog.settleT = 0;
         state = 'JUMPING';
         jumpsCount++;
 
@@ -1858,6 +1921,7 @@
         document.getElementById('start-overlay').classList.add('hidden');
         document.getElementById('win-overlay').classList.add('hidden');
         document.getElementById('store-overlay').classList.remove('hidden');
+        resetStorePreview();
         renderStore();
     }
 
@@ -1874,118 +1938,83 @@
         }
     }
 
+    // מה שמוצג בתצוגה המקדימה: מה שהצפרדע לובשת, או פריט שלוחצים עליו כדי "למדוד" לפני קנייה
+    let storePreview = { frog: null, color: null, accessory: null };
+    function resetStorePreview() {
+        storePreview = { frog: progress.equippedFrog, color: progress.equippedColor, accessory: progress.equippedAccessory };
+    }
+
+    // תיאור אחיד לכל לשונית: איזה קטלוג, איפה נשמר מה שנפתח ומה שנבחר, ואיך מציירים את הסמל
+    const STORE_TABS = {
+        frogs: { list: () => FROGS_CATALOG, unlocked: 'unlockedFrogs', equipped: 'equippedFrog', slot: 'frog',
+            title: frogName, sub: frogDesc, icon: (it) => `<div class="item-icon" style="background:#fff3b0;">${it.icon}</div>`, toast: (it) => t('toastFrog', frogName(it)) },
+        colors: { list: () => COLORS_CATALOG, unlocked: 'unlockedColors', equipped: 'equippedColor', slot: 'color',
+            title: colorName, sub: () => t('colorSub'), icon: (it) => `<div class="item-icon" style="background:${it.body};">🎨</div>`, toast: (it) => t('toastColor', colorName(it)) },
+        accessories: { list: () => ACCESSORIES_CATALOG, unlocked: 'unlockedAccessories', equipped: 'equippedAccessory', slot: 'accessory',
+            title: accName, sub: accDesc, icon: (it) => `<div class="item-icon" style="background:#e0f2fe;">${it.icon}</div>`, toast: (it) => t('toastAccessory', accName(it)) }
+    };
+
     function renderStore() {
         document.getElementById('store-bank-display').textContent = progress.coins;
+        if (!storePreview.frog) resetStorePreview();
 
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.tab === currentTab);
         });
 
-        const fSpec = FROGS_CATALOG.find(f => f.id === progress.equippedFrog) || FROGS_CATALOG[0];
-        const cSpec = COLORS_CATALOG.find(c => c.id === progress.equippedColor) || COLORS_CATALOG[0];
-        const aSpec = ACCESSORIES_CATALOG.find(a => a.id === progress.equippedAccessory) || ACCESSORIES_CATALOG[0];
+        const fSpec = FROGS_CATALOG.find(f => f.id === storePreview.frog) || FROGS_CATALOG[0];
+        const cSpec = COLORS_CATALOG.find(c => c.id === storePreview.color) || COLORS_CATALOG[0];
+        const aSpec = ACCESSORIES_CATALOG.find(a => a.id === storePreview.accessory) || ACCESSORIES_CATALOG[0];
         document.getElementById('preview-caption').textContent =
             `${frogName(fSpec)} • ${colorName(cSpec)}` + (aSpec.id !== 'none' ? ` • ${accName(aSpec)}` : '');
 
         const container = document.getElementById('store-items-container');
         container.innerHTML = '';
+        const tab = STORE_TABS[currentTab];
+        if (!tab) return;
 
-        if (currentTab === 'frogs') {
-            FROGS_CATALOG.forEach(item => {
-                const owned = progress.unlockedFrogs.includes(item.id);
-                const equipped = progress.equippedFrog === item.id;
-                container.appendChild(buildItemCard({
-                    iconHtml: `<div class="item-icon" style="background:#fff3b0;">${item.icon}</div>`,
-                    title: frogName(item),
-                    sub: frogDesc(item),
-                    owned,
-                    equipped,
-                    price: item.price,
-                    action: () => {
-                        if (owned) {
-                            progress.equippedFrog = item.id;
-                            saveProgress();
-                            audio.playLand();
-                            renderStore();
-                        } else if (progress.coins >= item.price) {
-                            progress.coins -= item.price;
-                            progress.unlockedFrogs.push(item.id);
-                            progress.equippedFrog = item.id;
-                            saveProgress();
-                            updateHUD();
-                            audio.playCoin(5);
-                            showToast(t('toastFrog', frogName(item)));
-                            renderStore();
-                        }
-                    }
-                }));
-            });
-        } else if (currentTab === 'colors') {
-            COLORS_CATALOG.forEach(item => {
-                const owned = progress.unlockedColors.includes(item.id);
-                const equipped = progress.equippedColor === item.id;
-                container.appendChild(buildItemCard({
-                    iconHtml: `<div class="item-icon" style="background:${item.body};">🎨</div>`,
-                    title: colorName(item),
-                    sub: t('colorSub'),
-                    owned,
-                    equipped,
-                    price: item.price,
-                    action: () => {
-                        if (owned) {
-                            progress.equippedColor = item.id;
-                            saveProgress();
-                            audio.playLand();
-                            renderStore();
-                        } else if (progress.coins >= item.price) {
-                            progress.coins -= item.price;
-                            progress.unlockedColors.push(item.id);
-                            progress.equippedColor = item.id;
-                            saveProgress();
-                            updateHUD();
-                            audio.playCoin(5);
-                            showToast(t('toastColor', colorName(item)));
-                            renderStore();
-                        }
-                    }
-                }));
-            });
-        } else if (currentTab === 'accessories') {
-            ACCESSORIES_CATALOG.forEach(item => {
-                const owned = progress.unlockedAccessories.includes(item.id);
-                const equipped = progress.equippedAccessory === item.id;
-                container.appendChild(buildItemCard({
-                    iconHtml: `<div class="item-icon" style="background:#e0f2fe;">${item.icon}</div>`,
-                    title: accName(item),
-                    sub: accDesc(item),
-                    owned,
-                    equipped,
-                    price: item.price,
-                    action: () => {
-                        if (owned) {
-                            progress.equippedAccessory = item.id;
-                            saveProgress();
-                            audio.playLand();
-                            renderStore();
-                        } else if (progress.coins >= item.price) {
-                            progress.coins -= item.price;
-                            progress.unlockedAccessories.push(item.id);
-                            progress.equippedAccessory = item.id;
-                            saveProgress();
-                            updateHUD();
-                            audio.playCoin(5);
-                            showToast(t('toastAccessory', accName(item)));
-                            renderStore();
-                        }
-                    }
-                }));
-            });
-        }
+        tab.list().forEach(item => {
+            const owned = progress[tab.unlocked].includes(item.id);
+            const equipped = progress[tab.equipped] === item.id;
+            const previewing = !equipped && storePreview[tab.slot] === item.id;
+            const equip = () => {
+                progress[tab.equipped] = item.id;
+                storePreview[tab.slot] = item.id;
+                saveProgress();
+                audio.playLand();
+                renderStore();
+            };
+            container.appendChild(buildItemCard({
+                iconHtml: tab.icon(item),
+                title: tab.title(item),
+                sub: tab.sub(item),
+                owned, equipped, previewing,
+                price: item.price,
+                // לחיצה על הכרטיס: פריט שלי → לובשים; פריט בחנות → מודדים בתצוגה (לחיצה נוספת מבטלת)
+                onCard: () => {
+                    if (owned) { if (!equipped) equip(); return; }
+                    storePreview[tab.slot] = previewing ? progress[tab.equipped] : item.id;
+                    audio.playLand();
+                    renderStore();
+                },
+                // הכפתור: קנייה (או לבישה אם כבר שלי)
+                onButton: () => {
+                    if (owned) { equip(); return; }
+                    if (progress.coins < item.price) return;
+                    progress.coins -= item.price;
+                    progress[tab.unlocked].push(item.id);
+                    updateHUD();
+                    audio.playCoin(5);
+                    showToast(tab.toast(item));
+                    equip();
+                }
+            }));
+        });
     }
 
-    function buildItemCard({ iconHtml, title, sub, owned, equipped, price, action }) {
+    function buildItemCard({ iconHtml, title, sub, owned, equipped, previewing, price, onCard, onButton }) {
         const div = document.createElement('div');
-        div.className = 'item-card' + (equipped ? ' active-item' : '');
+        div.className = 'item-card' + (equipped ? ' active-item' : '') + (previewing ? ' previewing' : '');
 
         let btnText = `🪙 ${price}`;
         let btnClass = 'sketch-btn';
@@ -2008,7 +2037,8 @@
                 ${btnText}
             </button>
         `;
-        div.querySelector('button').addEventListener('click', action);
+        div.addEventListener('click', onCard);
+        div.querySelector('button').addEventListener('click', (e) => { e.stopPropagation(); onButton(); });
         return div;
     }
 
@@ -2147,47 +2177,6 @@
     canvas.addEventListener('pointercancel', (e) => endSling(e, true));
     canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 
-    // ציור הגומייה / טבעת המגע מעל המשחק (בקואורדינטות מסך)
-    function drawSlingOverlay() {
-        if (!sling || state !== 'AIMING') return;
-        const ink = '#23262b';
-        ctx.save();
-        ctx.lineCap = 'round';
-        if (sling.fromFrog) {
-            const fx = frog.x - cameraX, fy = frog.y;
-            ctx.strokeStyle = sling.armed ? '#a0522d' : 'rgba(160, 82, 45, 0.45)';
-            ctx.lineWidth = 3.5;
-            [[fx - 24, fy - 2], [fx + 12, fy + 4]].forEach(([x, y]) => {
-                ctx.beginPath();
-                ctx.moveTo(x, y);
-                ctx.lineTo(sling.fx, sling.fy);
-                ctx.stroke();
-            });
-        } else {
-            ctx.strokeStyle = 'rgba(35, 38, 43, 0.7)';
-            ctx.lineWidth = 2;
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.28)';
-            ctx.beginPath();
-            ctx.arc(sling.ax, sling.ay, 22, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.setLineDash([6, 5]);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(sling.ax, sling.ay);
-            ctx.lineTo(sling.fx, sling.fy);
-            ctx.stroke();
-            ctx.setLineDash([]);
-        }
-        // נקודת האצבע
-        ctx.fillStyle = 'rgba(255, 253, 246, 0.85)';
-        ctx.strokeStyle = ink;
-        ctx.lineWidth = 2.2;
-        ctx.beginPath();
-        ctx.arc(sling.fx, sling.fy, 10, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-    }
 
     document.getElementById('btn-jump-action').addEventListener('pointerdown', (e) => {
         e.preventDefault();
@@ -2225,6 +2214,8 @@
     });
     function handleBack() {
         if (!exitOverlay.classList.contains('hidden')) { exitOverlay.classList.add('hidden'); return; }
+        const langMenu = document.getElementById('home-lang-menu');
+        if (!langMenu.classList.contains('hidden')) { langMenu.classList.add('hidden'); return; }
         switch (state) {
             case 'STORE': closeStore(); return;
             case 'SETTINGS': closeSettings(); return;
@@ -2300,10 +2291,37 @@
         document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = t(el.dataset.i18nTitle); });
         document.getElementById('win-title').textContent = t('winTitle', lastCompletedLevel);
         renderLangOptions();
+        renderHomeLang();
         renderSoundButtons();
         renderStore();
         layoutHomeButtons();
     }
+
+    function renderHomeLang() {
+        const meta = LANGUAGES.find(l => l.code === progress.language) || LANGUAGES[1];
+        document.getElementById('btn-home-lang').textContent = meta.flag;
+        const menu = document.getElementById('home-lang-menu');
+        menu.innerHTML = '';
+        LANGUAGES.forEach(l => {
+            const b = document.createElement('button');
+            b.className = l.code === progress.language ? 'active' : '';
+            b.textContent = `${l.flag} ${l.name}`;
+            b.addEventListener('click', (e) => {
+                e.stopPropagation();
+                progress.language = l.code;
+                saveProgress();
+                menu.classList.add('hidden');
+                applyLanguage();
+            });
+            menu.appendChild(b);
+        });
+    }
+    function closeHomeLang() { document.getElementById('home-lang-menu').classList.add('hidden'); }
+    document.getElementById('btn-home-lang').addEventListener('click', (e) => {
+        e.stopPropagation();
+        document.getElementById('home-lang-menu').classList.toggle('hidden');
+    });
+    document.addEventListener('click', closeHomeLang);
 
     function renderLangOptions() {
         const box = document.getElementById('lang-options');
@@ -2356,7 +2374,7 @@
         drawLilyPad(pad(L.store, 0.5));
         drawLilyPad(pad(L.settings, 2.6));
         drawLilyPad(pad(L.play, 0.3));
-        drawFrogCharacter(ctx, L.play.x, L.play.y - 28 * L.s, 1, 1, 2.1 * L.s);
+        drawFrogCharacter(ctx, L.play.x - 8 * L.s, L.play.y - 2 * L.s, FROG_POSES.sit, 2.1 * L.s, { blink: true });
     }
 
     function startPlaying() {
@@ -2413,8 +2431,7 @@
         });
 
         // התאוששות מתיחה/כיווץ של הצפרדע
-        frog.squashX += (1 - frog.squashX) * Math.min(1, dt * 12);
-        frog.squashY += (1 - frog.squashY) * Math.min(1, dt * 12);
+        if (frog.settleT > 0) frog.settleT = Math.max(0, frog.settleT - dt);
 
         if (state === 'AIMING') {
             // הצמדת הצפרדע לעלה הנוכחי (גם אם הוא צף!)
@@ -2435,14 +2452,11 @@
             // משיכת קלע במגע: הצפרדע מתכווצת ככל שמושכים חזק יותר
             if (sling) {
                 applySlingAim();
-                if (sling.armed) {
-                    frog.squashX = 1 + 0.14 * sling.ratio;
-                    frog.squashY = 1 - 0.16 * sling.ratio;
-                }
             }
 
             updateHUD();
         } else if (state === 'JUMPING') {
+            frog.airT += dt;
             const prevY = frog.y;
             frog.x += frog.vx * dt;
             frog.vy += GRAVITY * dt;
@@ -2464,8 +2478,7 @@
                         frog.vy = 0;
                         frog.currentPadIndex = i;
                         frog.safePadIndex = i;
-                        frog.squashX = 1.32;
-                        frog.squashY = 0.72;
+                        frog.settleT = 0.3;
                         audio.playLand();
 
                         // איסוף מטבע אם קיים על העלה
@@ -2508,8 +2521,7 @@
                 frog.y = safePad.y - 10;
                 frog.vx = 0;
                 frog.vy = 0;
-                frog.squashX = 1.2;
-                frog.squashY = 0.8;
+                frog.settleT = 0;
                 state = 'AIMING';
             }
         }
@@ -2915,7 +2927,7 @@
         const endX = startX + Math.cos(rad) * arrowLen;
         const endY = startY - Math.sin(rad) * arrowLen;
 
-        // 1. נקודות מסלול פרבולי צפוי (Trajectory Preview)
+        // נקודות המסלול הצפוי: קו מנוקד מעוקל שמראה לאן הצפרדע תנחת
         ctx.save();
         const vx = Math.cos(rad) * aimPower;
         const vy = -Math.sin(rad) * aimPower;
@@ -2930,7 +2942,7 @@
         }
         ctx.restore();
 
-        // 2. קו בסיס וקשת זווית (כמו בציור עם המספר 40°)
+        // קו בסיס, קשת זווית ומספר המעלות ליד החץ (כמו בציור עם המספר 40°)
         ctx.save();
         ctx.strokeStyle = 'rgba(35, 38, 43, 0.55)';
         ctx.setLineDash([4, 4]);
@@ -2947,6 +2959,7 @@
 
         ctx.fillStyle = '#23262b';
         ctx.font = '800 13px "Rubik", sans-serif';
+        ctx.direction = 'ltr';
         ctx.fillText(`${Math.round(aimAngleDeg)}°`, startX + 40, startY - 8);
         ctx.restore();
 
@@ -2985,195 +2998,874 @@
         ctx.restore();
     }
 
-    /**
-     * ציור הצפרדע המצוירת (תומך בכל 5 סוגי הצפרדעים, הצבעים והאביזרים)
-     */
-    function drawFrogCharacter(targetCtx, x, y, sx, sy, scale = 1) {
-        if (state === 'SPLASHING' && targetCtx === ctx) return;
+    // =========================================================================
+    // ציור הצפרדע: צפרדע "צבעי מים" ריאליסטית עם רגליים מפרקיות (ירך, שוק, קרסול, אצבעות)
+    // יחידות צפרדע: גוף ≈ 108 (עכוז -46 → חוטם 62), y למטה, זוויות במעלות (0 = קדימה, 90 = למטה).
+    // =========================================================================
+    const FROG_BASE_SCALE = 0.5;   // פיקסלים ליחידת צפרדע במשחק
+    const DEG = Math.PI / 180;
 
-        const frogType = FROGS_CATALOG.find(f => f.id === progress.equippedFrog) || FROGS_CATALOG[0];
-        const colorSpec = COLORS_CATALOG.find(c => c.id === progress.equippedColor) || COLORS_CATALOG[0];
-        const accId = progress.equippedAccessory || 'none';
+    const FROG_POSES = {
+        sit:    { pitch: -9,  stretch: 1.00, thigh: 30,  shin: 166, tarsus: 6,   toe: 2,   arm: 104, fore: 78,  hand: 12 },
+        crouch: { pitch: -18, stretch: 0.97, thigh: 42,  shin: 172, tarsus: 4,   toe: 0,   arm: 112, fore: 66,  hand: 8 },
+        launch: { pitch: -34, stretch: 1.05, thigh: 158, shin: 170, tarsus: 176, toe: 186, arm: 146, fore: 162, hand: 172 },
+        air:    { pitch: -6,  stretch: 1.08, thigh: 168, shin: 177, tarsus: 180, toe: 183, arm: 128, fore: 152, hand: 165 },
+        land:   { pitch: 12,  stretch: 1.02, thigh: 50,  shin: 172, tarsus: 14,  toe: 8,   arm: 66,  fore: 84,  hand: 28 }   // רגליים כבר מקופלות לפני הנגיעה
+    };
+    function lerpPose(a, b, t) {
+        t = Math.max(0, Math.min(1, t));
+        const o = {};
+        for (const k in a) o[k] = a[k] + (b[k] - a[k]) * t;
+        return o;
+    }
+    const easeInOut = (t) => { t = Math.max(0, Math.min(1, t)); return t * t * (3 - 2 * t); };
 
-        const breathe = Math.sin(timeElapsed * 4) * 1.2;
+    function seededRandom(seed) { let s = seed >>> 0; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
-        targetCtx.save();
-        targetCtx.translate(x, y + breathe);
-        targetCtx.scale(scale * sx, scale * sy);
-        targetCtx.lineCap = 'round';
-        targetCtx.lineJoin = 'round';
+    // ערבוב צבע hex עם שחור/לבן (amt<0 כהה יותר, amt>0 בהיר יותר)
+    function shadeHex(hex, amt) {
+        const n = parseInt(hex.slice(1), 16);
+        let r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+        const tgt = amt < 0 ? 0 : 255, k = Math.abs(amt);
+        r = Math.round(r + (tgt - r) * k); g = Math.round(g + (tgt - g) * k); b = Math.round(b + (tgt - b) * k);
+        return `rgb(${r},${g},${b})`;
+    }
+    function rgbTriplet(hex, amt) {
+        return shadeHex(hex, amt).slice(4, -1);
+    }
 
-        // הילת זהב לצפרדע מלך
-        if (frogType.id === 'king_frog') {
-            targetCtx.fillStyle = 'rgba(250, 204, 21, 0.28)';
-            targetCtx.beginPath();
-            targetCtx.arc(0, -6, 34, 0, Math.PI * 2);
-            targetCtx.fill();
-        }
+    // סגנון הצבע: כל צבע בחנות מוחל באותה דרך על גוף, בטן, כתמים והצללה
+    function frogStyle(colorSpec) {
+        return {
+            key: colorSpec.id,
+            body: colorSpec.body,
+            belly: colorSpec.belly,
+            spots: colorSpec.spots,
+            far: shadeHex(colorSpec.body, -0.22),
+            hatch: rgbTriplet(colorSpec.body, -0.62),
+            ink: '#23262b',
+            iris: '#f2c94c',
+            irisDark: '#a06a12'
+        };
+    }
 
-        // גלימת גיבור-על או גלימת מלך מאחורי הגוף
-        if (accId === 'hero_cape' || frogType.id === 'king_frog') {
-            targetCtx.fillStyle = frogType.id === 'king_frog' ? '#9b2226' : '#e63946';
-            targetCtx.strokeStyle = '#23262b';
-            targetCtx.lineWidth = 2;
-            targetCtx.beginPath();
-            targetCtx.moveTo(-6, -12);
-            targetCtx.quadraticCurveTo(-24, -14, -34, 4);
-            targetCtx.lineTo(-14, 8);
-            targetCtx.closePath();
-            targetCtx.fill();
-            targetCtx.stroke();
-        }
+    function frogBodyPath(c) {
+        c.beginPath();
+        c.moveTo(-46, 2);
+        c.bezierCurveTo(-49, -17, -27, -31, -2, -29);
+        c.bezierCurveTo(16, -28, 28, -31, 40, -29);
+        c.bezierCurveTo(52, -27, 62, -20, 62, -13);
+        c.bezierCurveTo(62, -8, 55, -3, 46, -2);
+        c.bezierCurveTo(36, 3, 20, 14, 0, 14);
+        c.bezierCurveTo(-22, 14, -40, 12, -46, 2);
+        c.closePath();
+    }
 
-        // רגל אחורית מקופלת (בסגנון הצפרדע האפורה מהסקיצה)
-        targetCtx.fillStyle = colorSpec.body;
-        targetCtx.strokeStyle = '#23262b';
-        targetCtx.lineWidth = 2.2;
-        targetCtx.beginPath();
-        targetCtx.ellipse(-11, 2, 11, 7, -0.45, 0, Math.PI * 2);
-        targetCtx.fill();
-        targetCtx.stroke();
+    const FROG_HIP = [-35, -2], FROG_SHOULDER = [28, 6];
+    const FROG_HIND = [[38, 20, 13], [36, 11, 7], [18, 6.5, 4.5]];
+    const FROG_FRONT = [[14, 9, 6.5], [14, 6.5, 4.8]];
 
-        // כף רגל אחורית
-        targetCtx.beginPath();
-        targetCtx.moveTo(-16, 8);
-        targetCtx.lineTo(-4, 9);
-        targetCtx.lineTo(-8, 5);
-        targetCtx.stroke();
-
-        // גוף ראשי
-        targetCtx.fillStyle = colorSpec.body;
-        targetCtx.beginPath();
-        targetCtx.ellipse(0, -4, 19, 14, -0.18, 0, Math.PI * 2);
-        targetCtx.fill();
-        targetCtx.stroke();
-
-        // בטן בהירה
-        targetCtx.fillStyle = colorSpec.belly;
-        targetCtx.beginPath();
-        targetCtx.ellipse(6, -1, 11, 9, -0.2, -0.8, 1.6);
-        targetCtx.fill();
-
-        // נקודות/הצללת עפרון על הגב
-        targetCtx.fillStyle = colorSpec.spots;
-        [[-8, -10, 2.3], [-13, -5, 1.9], [-4, -13, 1.8]].forEach(([dx, dy, r]) => {
-            targetCtx.beginPath();
-            targetCtx.arc(dx, dy, r, 0, Math.PI * 2);
-            targetCtx.fill();
+    function limbChain(start, defs, angles) {
+        const segs = [];
+        let [x, y] = start;
+        defs.forEach(([len, w1, w2], i) => {
+            const a = angles[i] * DEG;
+            const ex = x + Math.cos(a) * len, ey = y + Math.sin(a) * len;
+            segs.push({ x, y, ex, ey, a, len, w1, w2 });
+            x = ex; y = ey;
         });
+        return segs;
+    }
+    function frogLimbs(P) {
+        const hind = limbChain(FROG_HIP, FROG_HIND, [P.thigh, P.shin, P.tarsus]);
+        const front = limbChain(FROG_SHOULDER, FROG_FRONT, [P.arm, P.fore]);
+        const h = hind[hind.length - 1], f = front[front.length - 1];
+        return {
+            hind, front,
+            hindFoot: { x: h.ex, y: h.ey, ang: P.toe, n: 5, lens: [13, 18, 22, 18, 12], spread: 11 },
+            frontFoot: { x: f.ex, y: f.ey, ang: P.hand, n: 4, lens: [6, 8, 8, 6], spread: 18 }
+        };
+    }
+    function segQuad(c, s) {
+        const dx = Math.cos(s.a), dy = Math.sin(s.a), nx = -dy, ny = dx;
+        const mid = (s.w1 + s.w2) / 2 * 1.12;
+        const mx = s.x + dx * s.len / 2, my = s.y + dy * s.len / 2;
+        c.beginPath();
+        c.moveTo(s.x + nx * s.w1 / 2, s.y + ny * s.w1 / 2);
+        c.quadraticCurveTo(mx + nx * mid / 2, my + ny * mid / 2, s.ex + nx * s.w2 / 2, s.ey + ny * s.w2 / 2);
+        c.lineTo(s.ex - nx * s.w2 / 2, s.ey - ny * s.w2 / 2);
+        c.quadraticCurveTo(mx - nx * mid / 2 * 0.9, my - ny * mid / 2 * 0.9, s.x - nx * s.w1 / 2, s.y - ny * s.w1 / 2);
+        c.closePath();
+    }
+    function segEach(c, s, op) {
+        segQuad(c, s); op();
+        c.beginPath(); c.arc(s.x, s.y, s.w1 / 2, 0, Math.PI * 2); op();
+        c.beginPath(); c.arc(s.ex, s.ey, s.w2 / 2, 0, Math.PI * 2); op();
+    }
+    function toeTips(ft) {
+        const tips = [];
+        for (let i = 0; i < ft.n; i++) {
+            const a = (ft.ang + (i - (ft.n - 1) / 2) * ft.spread) * DEG;
+            tips.push([ft.x + Math.cos(a) * ft.lens[i], ft.y + Math.sin(a) * ft.lens[i]]);
+        }
+        return tips;
+    }
+    function webPath(c, ft, tips) {
+        c.beginPath();
+        c.moveTo(ft.x, ft.y);
+        tips.forEach(([tx, ty], i) => {
+            const px = tx * 0.78 + ft.x * 0.22, py = ty * 0.78 + ft.y * 0.22;
+            if (i === 0) c.lineTo(px, py);
+            else {
+                const [ax, ay] = tips[i - 1];
+                c.quadraticCurveTo((ax + tx) / 2 * 0.62 + ft.x * 0.38, (ay + ty) / 2 * 0.62 + ft.y * 0.38, px, py);
+            }
+        });
+        c.closePath();
+    }
 
-        // רגל קדמית
-        targetCtx.strokeStyle = '#23262b';
-        targetCtx.lineWidth = 2.2;
-        targetCtx.beginPath();
-        targetCtx.moveTo(7, 1);
-        targetCtx.lineTo(10, 10);
-        targetCtx.lineTo(15, 10);
-        targetCtx.stroke();
+    // רגל שלמה עם קו מתאר אחד רציף: מעבר דיו (עבה) → מילוי → הצללת עיפרון בצד התחתון
+    function drawFrogLimb(c, segs, ft, S, fill, lw, shade) {
+        const tips = toeTips(ft);
+        c.strokeStyle = S.ink;
+        c.fillStyle = S.ink;
+        c.lineWidth = lw * 2;
+        segs.forEach(s => segEach(c, s, () => { c.fill(); c.stroke(); }));
+        tips.forEach(([tx, ty]) => {
+            c.lineWidth = lw * 2 + 1.6;
+            c.beginPath(); c.moveTo(ft.x, ft.y); c.lineTo(tx, ty); c.stroke();
+            c.beginPath(); c.arc(tx, ty, 1.5 + lw, 0, Math.PI * 2); c.fill();
+        });
+        c.fillStyle = fill;
+        c.strokeStyle = fill;
+        segs.forEach(s => segEach(c, s, () => c.fill()));
+        tips.forEach(([tx, ty]) => {
+            c.lineWidth = 1.6;
+            c.beginPath(); c.moveTo(ft.x, ft.y); c.lineTo(tx, ty); c.stroke();
+            c.beginPath(); c.arc(tx, ty, 1.5, 0, Math.PI * 2); c.fill();
+        });
+        webPath(c, ft, tips);
+        c.globalAlpha = 0.8;
+        c.fill();
+        c.globalAlpha = 1;
+        if (shade) {
+            const r = seededRandom(segs.length * 97);
+            segs.slice(0, 2).forEach(s => {
+                c.save();
+                segQuad(c, s);
+                c.clip();
+                const dx = Math.cos(s.a), dy = Math.sin(s.a), nx = -dy, ny = dx;
+                const side = ny >= 0 ? 1 : -1;
+                c.lineWidth = 0.55;
+                c.strokeStyle = `rgba(${S.hatch},0.32)`;
+                c.beginPath();
+                for (let i = 0; i < s.len * 0.9; i++) {
+                    const t = r() * s.len;
+                    const off = (0.15 + r() * 0.45) * s.w1 * side;
+                    const px = s.x + dx * t + nx * off, py = s.y + dy * t + ny * off;
+                    const L = 3 + r() * 4;
+                    c.moveTo(px, py);
+                    c.lineTo(px + nx * side * L * 0.8 + dx * L * 0.5, py + ny * side * L * 0.8 + dy * L * 0.5);
+                }
+                c.stroke();
+                c.restore();
+            });
+        }
+    }
 
-        // חיוך הצפרדע
-        targetCtx.beginPath();
-        targetCtx.arc(11, -6, 6, 0.1, 0.95);
-        targetCtx.stroke();
+    // הגוף (עם כתמים, הצללה, עין ועור התוף) לא משתנה בין פריימים → מצויר פעם אחת לתמונה שמורה
+    const FROG_SPRITE_BOX = { x: -54, y: -46, w: 124, h: 66 };
+    const frogBodyCache = new Map();
+    function drawFrogBodyRaw(c, S, lw) {
+        frogBodyPath(c);
+        const g = c.createLinearGradient(0, -30, 0, 14);
+        g.addColorStop(0, S.body);
+        g.addColorStop(0.55, S.body);
+        g.addColorStop(0.82, S.belly);
+        g.addColorStop(1, S.belly);
+        c.fillStyle = g;
+        c.fill();
 
-        // עיניים בולטות בראש
-        targetCtx.fillStyle = colorSpec.body;
-        targetCtx.beginPath();
-        targetCtx.arc(4, -17, 6.2, 0, Math.PI * 2);
-        targetCtx.arc(13, -15, 5.8, 0, Math.PI * 2);
-        targetCtx.fill();
-        targetCtx.stroke();
+        c.save();
+        frogBodyPath(c);
+        c.clip();
+        c.fillStyle = S.spots;
+        [[-30, -14, 6, 4, 0.3], [-14, -22, 5, 3.5, -0.2], [2, -19, 4, 3, 0.5], [-26, -3, 4, 3, 0], [14, -24, 3.5, 2.5, 0.1], [-38, -6, 3, 2.2, 0.4]].forEach(([x, y, rx, ry, rot]) => {
+            c.beginPath(); c.ellipse(x, y, rx, ry, rot, 0, Math.PI * 2); c.fill();
+        });
+        const r = seededRandom(7);
+        c.lineWidth = 0.55;
+        for (let i = 0; i < 150; i++) {
+            const x = -48 + r() * 108;
+            const lowness = Math.pow(r(), 0.6);
+            const y = -8 + lowness * 22 - (x < -30 ? r() * 22 : 0);
+            const L = 4 + r() * 7;
+            const a = (58 + (r() - 0.5) * 16) * DEG;
+            c.strokeStyle = `rgba(${S.hatch},${0.42 * (0.35 + lowness * 0.65)})`;
+            c.beginPath();
+            c.moveTo(x, y);
+            c.lineTo(x + Math.cos(a) * L, y + Math.sin(a) * L);
+            c.stroke();
+        }
+        c.strokeStyle = 'rgba(255,255,255,0.45)';
+        c.lineWidth = 3;
+        c.beginPath();
+        c.moveTo(-30, -22); c.bezierCurveTo(-14, -28, 10, -27, 30, -27);
+        c.stroke();
+        c.strokeStyle = S.ink;
+        c.globalAlpha = 0.5;
+        c.lineWidth = lw * 0.6;
+        c.beginPath();
+        c.moveTo(33, -24);
+        c.bezierCurveTo(12, -21, -14, -19, -40, -8);
+        c.stroke();
+        c.globalAlpha = 1;
+        c.restore();
 
-        targetCtx.fillStyle = '#ffffff';
-        targetCtx.beginPath();
-        targetCtx.arc(4.5, -17, 4.1, 0, Math.PI * 2);
-        targetCtx.arc(13.5, -15, 3.8, 0, Math.PI * 2);
-        targetCtx.fill();
+        frogBodyPath(c);
+        c.lineWidth = lw;
+        c.strokeStyle = S.ink;
+        c.stroke();
 
-        targetCtx.fillStyle = '#23262b';
-        targetCtx.beginPath();
-        targetCtx.arc(5.8, -17, 2.1, 0, Math.PI * 2);
-        targetCtx.arc(14.8, -15, 2.0, 0, Math.PI * 2);
-        targetCtx.fill();
+        // עור התוף
+        c.beginPath();
+        c.arc(25, -16, 5.2, 0, Math.PI * 2);
+        c.fillStyle = S.far;
+        c.globalAlpha = 0.5;
+        c.fill();
+        c.globalAlpha = 1;
+        c.lineWidth = lw * 0.7;
+        c.stroke();
 
-        // מאפיינים ייחודיים לפי סוג הצפרדע שנבחר
-        if (frogType.id === 'male_frog') {
-            // עניבת פרפר אדומה
-            targetCtx.fillStyle = '#e63946';
-            targetCtx.beginPath();
-            targetCtx.moveTo(11, -1); targetCtx.lineTo(6, -4); targetCtx.lineTo(6, 2); targetCtx.closePath();
-            targetCtx.moveTo(11, -1); targetCtx.lineTo(16, -4); targetCtx.lineTo(16, 2); targetCtx.closePath();
-            targetCtx.fill();
-            targetCtx.stroke();
-        } else if (frogType.id === 'female_frog') {
-            // לחיים ורודות וריסים
-            targetCtx.fillStyle = 'rgba(244, 114, 182, 0.65)';
-            targetCtx.beginPath();
-            targetCtx.arc(13, -9, 3.2, 0, Math.PI * 2);
-            targetCtx.fill();
+        // פה ונחיר
+        c.lineWidth = lw * 0.85;
+        c.beginPath();
+        c.moveTo(61, -11);
+        c.bezierCurveTo(54, -6, 44, -6, 33, -9);
+        c.stroke();
+        c.beginPath();
+        c.arc(56, -19, 0.9, 0, Math.PI * 2);
+        c.fillStyle = S.ink;
+        c.fill();
 
-            targetCtx.strokeStyle = '#23262b';
-            targetCtx.lineWidth = 1.6;
-            targetCtx.beginPath();
-            targetCtx.moveTo(3, -23); targetCtx.lineTo(1, -26);
-            targetCtx.moveTo(6, -23); targetCtx.lineTo(6, -26);
-            targetCtx.moveTo(13, -21); targetCtx.lineTo(14, -24);
-            targetCtx.stroke();
-        } else if (frogType.id === 'prince_frog') {
-            // נזר נסיך קטן
-            targetCtx.fillStyle = '#ffd60a';
-            targetCtx.beginPath();
-            targetCtx.moveTo(3, -22); targetCtx.lineTo(5, -28); targetCtx.lineTo(8, -24);
-            targetCtx.lineTo(11, -28); targetCtx.lineTo(13, -22);
-            targetCtx.closePath();
-            targetCtx.fill();
-            targetCtx.stroke();
-        } else if (frogType.id === 'king_frog') {
-            // כתר מלך גדול
-            targetCtx.fillStyle = '#ffb703';
-            targetCtx.beginPath();
-            targetCtx.moveTo(1, -22); targetCtx.lineTo(0, -32); targetCtx.lineTo(5, -26);
-            targetCtx.lineTo(9, -34); targetCtx.lineTo(13, -26); targetCtx.lineTo(17, -31);
-            targetCtx.lineTo(15, -22);
-            targetCtx.closePath();
-            targetCtx.fill();
-            targetCtx.stroke();
+        // עין: גבשושית, קשתית זהובה, אישון אופקי
+        c.save();
+        c.translate(41, -27);
+        c.lineWidth = lw;
+        c.beginPath();
+        c.arc(0, 0, 8.5, Math.PI * 0.95, Math.PI * 2.05);
+        c.fillStyle = S.body;
+        c.fill();
+        c.stroke();
+        c.beginPath();
+        c.arc(0, 0, 6.3, 0, Math.PI * 2);
+        const ig = c.createRadialGradient(-1.5, -1.5, 0.5, 0, 0, 6.3);
+        ig.addColorStop(0, S.iris);
+        ig.addColorStop(1, S.irisDark);
+        c.fillStyle = ig;
+        c.fill();
+        c.stroke();
+        c.beginPath();
+        c.ellipse(0.4, 0.3, 3.9, 2.2, 0, 0, Math.PI * 2);
+        c.fillStyle = '#15161a';
+        c.fill();
+        c.beginPath();
+        c.arc(-1.8, -2.1, 1.1, 0, Math.PI * 2);
+        c.fillStyle = '#fff';
+        c.fill();
+        c.restore();
+    }
+    function frogBodySprite(S, pxPerUnit, lw) {
+        const q = Math.max(0.5, Math.round(pxPerUnit * 4) / 4);   // מדרגות של רבע כדי לא לייצר אינסוף תמונות
+        const key = `${S.key}|${q}`;
+        let spr = frogBodyCache.get(key);
+        if (!spr) {
+            const B = FROG_SPRITE_BOX;
+            const cv = document.createElement('canvas');
+            cv.width = Math.ceil(B.w * q);
+            cv.height = Math.ceil(B.h * q);
+            const g = cv.getContext('2d');
+            g.scale(q, q);
+            g.translate(-B.x, -B.y);
+            g.lineCap = 'round';
+            g.lineJoin = 'round';
+            drawFrogBodyRaw(g, S, lw);
+            if (frogBodyCache.size > 24) frogBodyCache.clear();
+            frogBodyCache.set(key, cv);
+            spr = cv;
+        }
+        return spr;
+    }
+
+    // ---- סוגי צפרדעים ואביזרים (במערכת הצירים של הגוף, כך שהם זזים ומסתובבים יחד איתו) ----
+    const HEAD_X = 38, HEAD_Y = -37.5;   // עוגן לכובעים: מעל העיניים (העין מגיעה עד ‎-35.5), קרוב לראש אבל לא נוגע בעין
+    const HAT_ACCESSORIES = ['party_hat', 'pirate_hat', 'royal_crown', 'top_hat', 'cowboy_hat', 'wizard_hat', 'flower_crown'];
+
+    function drawCrown(c, x, y, w, h, fill, lw) {
+        c.save();
+        c.translate(x, y);
+        c.rotate(-0.12);
+        c.beginPath();
+        c.moveTo(-w / 2, 0);
+        c.lineTo(-w / 2, -h);
+        c.lineTo(-w / 4, -h * 0.55);
+        c.lineTo(0, -h * 1.1);
+        c.lineTo(w / 4, -h * 0.55);
+        c.lineTo(w / 2, -h);
+        c.lineTo(w / 2, 0);
+        c.closePath();
+        c.fillStyle = fill;
+        c.fill();
+        c.lineWidth = lw;
+        c.strokeStyle = '#23262b';
+        c.stroke();
+        c.fillStyle = '#e63946';
+        [[-w / 2, -h], [0, -h * 1.1], [w / 2, -h]].forEach(([px, py]) => { c.beginPath(); c.arc(px, py, 1.6, 0, Math.PI * 2); c.fill(); c.stroke(); });
+        c.restore();
+    }
+
+    // גלימה (בגד רפוי): קשורה בצוואר, מונחת על הגב בישיבה, נמתחת לאחור ומתנופפת ברוח בזמן קפיצה.
+    // כלל: כל אביזר רפוי (גלימה, צעיף, סרט...) חייב להתנופף ברוח לפי המהירות.
+    // בישיבה: הקצה העליון צמוד לקו הגב מהצוואר ועד העכוז (מכסה את כל הגב), הקצה התחתון יורד על הצד ונופל על העכוז.
+    // בתעופה: הגלימה נמתחת ישר לאחור.
+    const CAPE_EDGES = {
+        sitTop: [[32, -31], [8, -33], [-16, -32], [-36, -24], [-49, -9], [-52, 7]],
+        sitBot: [[25, -16], [6, -11], [-14, -6], [-31, -1], [-43, 6], [-47, 14]],
+        flyTop: [[32, -31], [10, -34], [-14, -36], [-40, -35], [-64, -32], [-86, -28]],
+        flyBot: [[25, -16], [8, -19], [-14, -20], [-38, -19], [-62, -16], [-82, -12]]
+    };
+    function bez(poly, u) {
+        const f = u * (poly.length - 1), i = Math.min(poly.length - 2, Math.floor(f)), t = f - i;
+        return [poly[i][0] + (poly[i + 1][0] - poly[i][0]) * t, poly[i][1] + (poly[i + 1][1] - poly[i][1]) * t];
+    }
+    function drawCape(c, P, fill, lw) {
+        const flow = Math.max(0, Math.min(1, (P.thigh - 30) / 130));
+        const flap = P.flap || 0;
+        const amp = 0.9 + 7.5 * flap;                // גובה הגל
+        const speed = 2.6 + 13 * flap;               // מהירות הגל לאורך הבד
+        const N = 12;
+        const top = [], bot = [];
+        for (let i = 0; i <= N; i++) {
+            const u = i / N;
+            const [sx, sy] = bez(CAPE_EDGES.sitTop, u), [fx, fy] = bez(CAPE_EDGES.flyTop, u);
+            const [bx, by] = bez(CAPE_EDGES.sitBot, u), [gx, gy] = bez(CAPE_EDGES.flyBot, u);
+            const w = amp * u * u;                   // צמוד לצוואר, חופשי בקצה
+            const waveTop = Math.sin(timeElapsed * speed - u * 7) * w;
+            const waveBot = Math.sin(timeElapsed * speed - u * 7 - 0.5) * w * 1.15;
+            top.push([sx + (fx - sx) * flow, sy + (fy - sy) * flow + waveTop]);
+            bot.push([bx + (gx - bx) * flow, by + (gy - by) * flow + waveBot]);
+        }
+        const pts = top.concat(bot.reverse());
+        c.beginPath();
+        c.moveTo(pts[0][0], pts[0][1]);
+        for (let i = 1; i < pts.length - 1; i++) {
+            const mx = (pts[i][0] + pts[i + 1][0]) / 2, my = (pts[i][1] + pts[i + 1][1]) / 2;
+            c.quadraticCurveTo(pts[i][0], pts[i][1], mx, my);
+        }
+        c.lineTo(pts[pts.length - 1][0], pts[pts.length - 1][1]);
+        c.closePath();
+        c.fillStyle = fill;
+        c.fill();
+        c.lineWidth = lw;
+        c.strokeStyle = '#23262b';
+        c.stroke();
+        // קפלי בד: קו כהה עדין באמצע הגלימה שזז עם הגל
+        c.globalAlpha = 0.3;
+        c.lineWidth = lw * 0.6;
+        c.beginPath();
+        for (let i = 2; i <= N; i++) {
+            const tp = top[i], bp = bot[N - i];
+            const x = tp[0] * 0.55 + bp[0] * 0.45, y = tp[1] * 0.55 + bp[1] * 0.45;
+            if (i === 2) c.moveTo(x, y); else c.lineTo(x, y);
+        }
+        c.stroke();
+        c.globalAlpha = 1;
+    }
+
+    // צעיף סרוג: כרוך סביב הצוואר עם קשר בגרון; שני הקצוות (עם פרנזים) תלויים על החזה בישיבה ומתנופפים לאחור ברוח בתעופה
+    function scarfRibbon(c, pts, w0, w1, lw, fringe) {
+        const n = pts.length;
+        const L = [], R = [];
+        for (let i = 0; i < n; i++) {
+            const [x0, y0] = pts[Math.max(0, i - 1)], [x1, y1] = pts[Math.min(n - 1, i + 1)];
+            let dx = x1 - x0, dy = y1 - y0;
+            const d = Math.hypot(dx, dy) || 1;
+            const nx = -dy / d, ny = dx / d;
+            const w = (w0 + (w1 - w0) * i / (n - 1)) / 2;
+            L.push([pts[i][0] + nx * w, pts[i][1] + ny * w]);
+            R.push([pts[i][0] - nx * w, pts[i][1] - ny * w]);
+        }
+        const outline = () => {
+            c.beginPath();
+            L.forEach(([x, y], i) => (i ? c.lineTo(x, y) : c.moveTo(x, y)));
+            for (let i = n - 1; i >= 0; i--) c.lineTo(R[i][0], R[i][1]);
+            c.closePath();
+        };
+        outline();
+        c.fillStyle = '#e63946';
+        c.fill();
+        // פסים סרוגים לרוחב
+        c.save();
+        outline();
+        c.clip();
+        c.strokeStyle = '#fff3e0';
+        c.lineWidth = 2.2;
+        for (let i = 2; i < n; i += 3) {
+            c.beginPath(); c.moveTo(L[i][0], L[i][1]); c.lineTo(R[i][0], R[i][1]); c.stroke();
+        }
+        c.restore();
+        outline();
+        c.lineWidth = lw;
+        c.strokeStyle = '#23262b';
+        c.stroke();
+        if (fringe) {
+            const [ex, ey] = pts[n - 1], [px, py] = pts[n - 2];
+            const dx = ex - px, dy = ey - py, d = Math.hypot(dx, dy) || 1;
+            c.lineWidth = lw * 0.7;
+            for (let k = -1; k <= 1; k++) {
+                const t = k / 1.4;
+                const sx = ex + (L[n - 1][0] - ex) * t * -1, sy = ey + (L[n - 1][1] - ey) * t * -1;
+                c.beginPath(); c.moveTo(sx, sy); c.lineTo(sx + dx / d * 3.5, sy + dy / d * 3.5); c.stroke();
+            }
+        }
+    }
+    function drawScarf(c, P, lw) {
+        const flap = P.flap || 0;
+        const flow = Math.max(0, Math.min(1, (P.thigh - 30) / 130));
+        const knot = [38, 3];
+        // שני הקצוות
+        [1, 0].forEach(k => {
+            const pts = [];
+            for (let i = 0; i <= 10; i++) {
+                const u = i / 10;
+                const hangX = knot[0] + u * (5 - k * 9), hangY = knot[1] + u * (24 - k * 4);
+                const flyX = knot[0] - u * (54 + k * 8), flyY = knot[1] - u * (17 - k * 7) - Math.sin(u * Math.PI) * 4;
+                const w = Math.sin(timeElapsed * (3 + 15 * flap) - u * 6.5 - k * 1.3) * u * (0.7 + 6 * flap);
+                const x = hangX + (flyX - hangX) * flow, y = hangY + (flyY - hangY) * flow;
+                // הגל ניצב לכיוון הקצה (בתלייה זז לצדדים, בתעופה למעלה-למטה)
+                pts.push([x + w * (1 - flow), y + w * flow]);
+            }
+            scarfRibbon(c, pts, 7.5, 6.5, lw, true);
+        });
+        // הכריכה סביב הצוואר (מאחורי העין, לא נוגעת בפה)
+        const wrap = [];
+        for (let i = 0; i <= 8; i++) {
+            const u = i / 8;
+            wrap.push([22 + u * 16 - Math.sin(u * Math.PI) * 6, -29 + u * 32]);   // הקשת פונה לכיוון הגוף והרגליים, לא לפנים
+        }
+        scarfRibbon(c, wrap, 9, 10, lw, false);
+        // קשר
+        c.fillStyle = '#c92a37';
+        c.beginPath(); c.ellipse(knot[0], knot[1], 5, 4, 0.4, 0, Math.PI * 2); c.fill();
+        c.lineWidth = lw; c.strokeStyle = '#23262b'; c.stroke();
+    }
+
+    function drawFrogExtrasBehind(c, typeId, accId, P, lw) {
+        if (typeId === 'king_frog') {
+            const glow = c.createRadialGradient(5, -10, 10, 5, -10, 72);
+            glow.addColorStop(0, 'rgba(250, 204, 21, 0.38)');
+            glow.addColorStop(1, 'rgba(250, 204, 21, 0)');
+            c.fillStyle = glow;
+            c.beginPath();
+            c.arc(5, -10, 72, 0, Math.PI * 2);
+            c.fill();
+        }
+    }
+
+    function drawFrogExtrasOnBody(c, typeId, accId, P, lw) {
+        if (typeId === 'prince_frog') {
+            // אבנט מלכותי באלכסון על הגוף
+            c.save();
+            frogBodyPath(c);
+            c.clip();
+            c.beginPath();
+            c.moveTo(16, -32); c.lineTo(26, -32); c.lineTo(2, 18); c.lineTo(-8, 18);
+            c.closePath();
+            c.fillStyle = '#3a86ff';
+            c.fill();
+            c.lineWidth = lw * 0.7;
+            c.strokeStyle = '#23262b';
+            c.stroke();
+            c.strokeStyle = '#ffd60a';
+            c.lineWidth = lw * 0.9;
+            c.beginPath(); c.moveTo(21, -32); c.lineTo(-3, 18); c.stroke();
+            c.restore();
         }
 
-        // אביזרים נבחרים מהחנות
+    }
+
+    function drawFrogExtrasFront(c, typeId, accId, P, lw) {
+        const hat = HAT_ACCESSORIES.includes(accId);
+        c.lineWidth = lw;
+        c.strokeStyle = '#23262b';
+        if (typeId === 'male_frog') {
+            // עניבת פרפר אדומה בגרון
+            c.save();
+            c.translate(47, 1);
+            c.fillStyle = '#e63946';
+            c.beginPath();
+            c.moveTo(0, 0); c.lineTo(-7, -5); c.lineTo(-7, 5); c.closePath();
+            c.moveTo(0, 0); c.lineTo(7, -5); c.lineTo(7, 5); c.closePath();
+            c.fill(); c.stroke();
+            c.beginPath(); c.arc(0, 0, 2.2, 0, Math.PI * 2); c.fill(); c.stroke();
+            c.restore();
+        } else if (typeId === 'female_frog') {
+            // לחיים ורודות, ריסים ופרח
+            c.fillStyle = 'rgba(244, 114, 182, 0.55)';
+            c.beginPath(); c.ellipse(49, -8, 5, 3, 0, 0, Math.PI * 2); c.fill();
+            c.lineWidth = lw * 0.8;
+            c.beginPath();
+            c.moveTo(36, -33); c.lineTo(33.5, -37);
+            c.moveTo(40, -35.5); c.lineTo(39.5, -40);
+            c.moveTo(44.5, -34.5); c.lineTo(46.5, -38.5);
+            c.stroke();
+            if (!hat) {
+                c.save();
+                c.translate(21, -33);
+                c.fillStyle = '#f472b6';
+                for (let i = 0; i < 5; i++) {
+                    const a = i * Math.PI * 2 / 5;
+                    c.beginPath(); c.arc(Math.cos(a) * 3.6, Math.sin(a) * 3.6, 2.8, 0, Math.PI * 2); c.fill(); c.lineWidth = lw * 0.6; c.stroke();
+                }
+                c.fillStyle = '#ffd60a';
+                c.beginPath(); c.arc(0, 0, 2.2, 0, Math.PI * 2); c.fill(); c.stroke();
+                c.restore();
+            }
+        } else if (typeId === 'prince_frog' && !hat) {
+            drawCrown(c, HEAD_X, HEAD_Y, 14, 7, '#ffd60a', lw * 0.8);
+        } else if (typeId === 'king_frog' && !hat) {
+            drawCrown(c, HEAD_X, HEAD_Y, 20, 13, '#ffb703', lw);
+        }
+
+        // אביזרים מהחנות
         if (accId === 'party_hat') {
-            targetCtx.fillStyle = '#ff5964';
-            targetCtx.beginPath();
-            targetCtx.moveTo(2, -22); targetCtx.lineTo(14, -21); targetCtx.lineTo(8, -36);
-            targetCtx.closePath();
-            targetCtx.fill();
-            targetCtx.stroke();
+            c.save();
+            c.translate(HEAD_X, HEAD_Y);
+            c.rotate(-0.28);
+            const cone = () => { c.beginPath(); c.moveTo(-10, 0); c.lineTo(10, 0); c.lineTo(0, -26); c.closePath(); };
+            cone();
+            c.fillStyle = '#ff5964';
+            c.fill();
+            c.save(); cone(); c.clip();
+            c.strokeStyle = '#ffd60a'; c.lineWidth = 3;
+            [-6, -13, -20].forEach(yy => { c.beginPath(); c.moveTo(-12, yy + 4); c.lineTo(12, yy - 2); c.stroke(); });
+            c.restore();
+            cone();
+            c.lineWidth = lw; c.strokeStyle = '#23262b'; c.stroke();
+            c.fillStyle = '#fff3b0';
+            c.beginPath(); c.arc(0, -27, 3.6, 0, Math.PI * 2); c.fill(); c.stroke();
+            c.restore();
         } else if (accId === 'sunglasses') {
-            targetCtx.fillStyle = '#111827';
-            targetCtx.beginPath();
-            targetCtx.roundRect(1, -20, 17, 6.5, 2);
-            targetCtx.fill();
-            targetCtx.stroke();
+            // משקפי שמש עגולים: עדשה עגולה על בליטת העין, העדשה הרחוקה מציצה רק כפס דק מאחוריה, ומוט אחורה לאוזן
+            c.save();
+            const tint = c.createLinearGradient(0, -36, 0, -18);
+            tint.addColorStop(0, '#1e1b4b');
+            tint.addColorStop(1, '#5b21b6');
+            c.strokeStyle = '#23262b';
+            // עדשה רחוקה: אותה עדשה, מוסטת קצת קדימה ולמעלה ומוצרת (רואים רק את השוליים שלה)
+            c.save();
+            c.translate(45.8, -27.6);
+            c.rotate(0.08);
+            c.beginPath(); c.ellipse(0, 0, 4.4, 7.9, 0, 0, Math.PI * 2);
+            c.fillStyle = tint; c.fill();
+            c.lineWidth = lw * 1.2; c.stroke();
+            c.restore();
+            // מוט אחורה עד מעל עור התוף
+            c.lineWidth = lw * 1.1;
+            c.beginPath(); c.moveTo(32.8, -28); c.quadraticCurveTo(28, -27, 23, -22); c.stroke();
+            // עדשה קרובה על העין
+            c.beginPath(); c.arc(41, -27, 8.2, 0, Math.PI * 2);
+            c.fillStyle = tint; c.fill();
+            c.lineWidth = lw * 1.4; c.stroke();
+            c.save();
+            c.beginPath(); c.arc(41, -27, 8.2, 0, Math.PI * 2); c.clip();
+            c.strokeStyle = 'rgba(255,255,255,0.6)';
+            c.lineWidth = 2;
+            c.beginPath(); c.moveTo(37, -22); c.lineTo(42, -33); c.stroke();
+            c.lineWidth = 1;
+            c.beginPath(); c.moveTo(40.5, -20.5); c.lineTo(45, -29.5); c.stroke();
+            c.restore();
+            c.restore();
         } else if (accId === 'pirate_hat') {
-            targetCtx.fillStyle = '#1f2937';
-            targetCtx.beginPath();
-            targetCtx.moveTo(-4, -21);
-            targetCtx.quadraticCurveTo(8, -34, 20, -20);
-            targetCtx.closePath();
-            targetCtx.fill();
-            targetCtx.stroke();
+            // בנדנה של פיראט: אדומה עם נקודות לבנות, עוטפת את קודקוד הראש (עם שקע סביב העין),
+            // קשר מאחור ושני קצוות שמתנופפים ברוח
+            const EYE_X = 41, EYE_Y = -27, DENT_R = 8.9;   // שקע סביב העין: רואים את הטבעת הירוקה של העין, הבנדנה רק נוגעת בחלקה העליון
+            const flap = P.flap || 0;
+            const flow = Math.max(0, Math.min(1, (P.thigh - 30) / 130));
+            const knotX = 3, knotY = -25;
+            // הקצוות (מאחורי הבנדנה)
+            [1, 0].forEach(k => {
+                const pts = [];
+                for (let i = 0; i <= 8; i++) {
+                    const u = i / 8;
+                    const hangX = knotX - u * (9 + k * 4), hangY = knotY + u * (13 - k * 4);
+                    const flyX = knotX - u * (24 + k * 6), flyY = knotY - u * (3 - k * 6);
+                    const w = Math.sin(timeElapsed * (3 + 15 * flap) - u * 6 - k * 1.2) * u * (0.6 + 5 * flap);
+                    pts.push([hangX + (flyX - hangX) * flow, hangY + (flyY - hangY) * flow + w]);
+                }
+                c.beginPath();
+                pts.forEach(([x, y], i) => (i ? c.lineTo(x, y) : c.moveTo(x, y)));
+                c.lineCap = 'round';
+                c.lineWidth = 5.5 + lw * 2;
+                c.strokeStyle = '#23262b';
+                c.stroke();
+                c.lineWidth = 5.5;
+                c.strokeStyle = k ? '#c92a37' : '#e63946';
+                c.stroke();
+            });
+            // הבנדנה צמודה לראש: הקצה העליון רק קצת מעל קו הראש, והשפה התחתונה יושבת על צד הראש (אין רווח)
+            const cap = () => {
+                c.beginPath();
+                c.moveTo(0, -19.5);
+                c.bezierCurveTo(0, -39, 26, -45, 44, -40);
+                c.bezierCurveTo(54, -37, 60, -31, 60.5, -19.5);
+                // השפה התחתונה מתעגלת כמו קו הראש: יורדת לכיוון החוטם מקדימה ולכיוון הגב מאחור
+                c.bezierCurveTo(52, -24, 42, -26, 30, -25.5);
+                c.bezierCurveTo(18, -25, 7, -23.5, 0, -19.5);
+                c.closePath();
+            };
+            c.save();
+            c.beginPath();
+            c.rect(-80, -90, 200, 160);
+            c.arc(EYE_X, EYE_Y, DENT_R, 0, Math.PI * 2, true);
+            c.clip('evenodd');
+            cap();
+            c.fillStyle = '#e63946';
+            c.fill();
+            c.save(); cap(); c.clip();
+            c.fillStyle = '#fff3e0';
+            [[8, -29], [15, -34], [23, -37], [32, -38], [41, -37.5], [50, -34], [55, -27], [19, -30], [27, -31.5], [6, -23.5], [35, -32], [57, -22]].forEach(([x, y]) => {
+                c.beginPath(); c.arc(x, y, 1.6, 0, Math.PI * 2); c.fill();
+            });
+            // שפה מקופלת בתחתית
+            c.strokeStyle = '#a61e2b';
+            c.lineWidth = 2.2;
+            c.beginPath(); c.moveTo(0.5, -21); c.bezierCurveTo(7, -25, 18, -26.5, 30, -27); c.bezierCurveTo(42, -27.5, 52, -25.5, 60, -21); c.stroke();
+            c.restore();
+            cap();
+            c.lineWidth = lw;
+            c.strokeStyle = '#23262b';
+            c.stroke();
+            c.restore();
+            // קו השקע סביב העין
+            c.save(); cap(); c.clip();
+            c.beginPath(); c.arc(EYE_X, EYE_Y, DENT_R, 0, Math.PI * 2);
+            c.lineWidth = lw; c.strokeStyle = '#23262b'; c.stroke();
+            c.restore();
+            // הקשר
+            c.fillStyle = '#c92a37';
+            c.beginPath(); c.ellipse(knotX, knotY, 3.6, 3, 0.3, 0, Math.PI * 2); c.fill();
+            c.lineWidth = lw; c.strokeStyle = '#23262b'; c.stroke();
         } else if (accId === 'royal_crown') {
-            targetCtx.fillStyle = '#facc15';
-            targetCtx.beginPath();
-            targetCtx.moveTo(2, -22); targetCtx.lineTo(2, -30); targetCtx.lineTo(6, -26);
-            targetCtx.lineTo(9, -32); targetCtx.lineTo(12, -26); targetCtx.lineTo(15, -30);
-            targetCtx.lineTo(14, -22);
-            targetCtx.closePath();
-            targetCtx.fill();
-            targetCtx.stroke();
+            drawCrown(c, HEAD_X, HEAD_Y, 18, 12, '#facc15', lw);
+        } else if (accId === 'top_hat') {
+            c.save();
+            c.translate(HEAD_X, HEAD_Y);
+            c.rotate(-0.15);
+            c.fillStyle = '#1f2937';
+            c.beginPath(); c.roundRect(-8, -20, 16, 20, 2); c.fill(); c.stroke();
+            c.fillStyle = '#e63946';
+            c.beginPath(); c.rect(-8, -6, 16, 4); c.fill(); c.stroke();
+            c.fillStyle = '#1f2937';
+            c.beginPath(); c.ellipse(0, 0, 14, 3, 0, 0, Math.PI * 2); c.fill(); c.stroke();
+            c.restore();
+        } else if (accId === 'cowboy_hat') {
+            c.save();
+            c.translate(HEAD_X, HEAD_Y);
+            c.rotate(-0.12);
+            c.fillStyle = '#a0662f';
+            c.beginPath();
+            c.moveTo(-9, -1);
+            c.quadraticCurveTo(-10, -14, -4, -15);
+            c.quadraticCurveTo(0, -11, 4, -15);
+            c.quadraticCurveTo(10, -14, 9, -1);
+            c.closePath(); c.fill(); c.stroke();
+            c.fillStyle = '#7a4a1f';
+            c.beginPath(); c.rect(-9, -5, 18, 3.5); c.fill();
+            c.fillStyle = '#a0662f';
+            c.beginPath();
+            c.moveTo(-20, -5); c.quadraticCurveTo(-16, 2, 0, 2); c.quadraticCurveTo(16, 2, 20, -5);
+            c.quadraticCurveTo(12, -1, 0, -1); c.quadraticCurveTo(-12, -1, -20, -5);
+            c.closePath(); c.fill(); c.stroke();
+            c.restore();
+        } else if (accId === 'flower_crown') {
+            const cols = ['#f472b6', '#ffd60a', '#a78bfa', '#fb923c', '#f472b6', '#60a5fa'];
+            c.lineWidth = lw * 0.6;
+            for (let i = 0; i < 6; i++) {
+                const u = i / 5;
+                const fx = 24 + u * 26, fy = -37.5 - Math.sin(u * Math.PI) * 3;
+                c.fillStyle = '#4eb33d';
+                c.beginPath(); c.ellipse(fx - 3, fy + 1, 3, 1.5, -0.5, 0, Math.PI * 2); c.fill();
+                c.fillStyle = cols[i];
+                for (let k = 0; k < 5; k++) {
+                    const a = k * Math.PI * 2 / 5;
+                    c.beginPath(); c.arc(fx + Math.cos(a) * 2.4, fy + Math.sin(a) * 2.4, 2, 0, Math.PI * 2); c.fill(); c.stroke();
+                }
+                c.fillStyle = '#fff3b0';
+                c.beginPath(); c.arc(fx, fy, 1.4, 0, Math.PI * 2); c.fill();
+            }
+            c.lineWidth = lw;
+        } else if (accId === 'wizard_hat') {
+            // כובע קוסם: הקצה הרך מתכופף לאחור ומתנופף ברוח
+            const flap = P.flap || 0;
+            const flow = Math.max(0, Math.min(1, (P.thigh - 30) / 130));
+            const sway = Math.sin(timeElapsed * (3 + 12 * flap)) * (1.2 + 5 * flap);
+            const tipX = -10 - 12 * flow, tipY = -28 + 10 * flow + sway;
+            c.save();
+            c.translate(HEAD_X, HEAD_Y);
+            c.rotate(-0.15);
+            c.fillStyle = '#6d28d9';
+            c.beginPath();
+            c.moveTo(-12, 0);
+            c.quadraticCurveTo(-6, -16, tipX, tipY);
+            c.quadraticCurveTo(2, -18, 12, 0);
+            c.closePath(); c.fill(); c.stroke();
+            c.fillStyle = '#ffd60a';
+            [[-3, -6], [3, -11], [-1, -15]].forEach(([sx, sy]) => {
+                c.beginPath();
+                for (let k = 0; k < 5; k++) {
+                    const a = -Math.PI / 2 + k * Math.PI * 4 / 5;
+                    c.lineTo(sx + Math.cos(a) * 2.2, sy + Math.sin(a) * 2.2);
+                }
+                c.closePath(); c.fill();
+            });
+            c.fillStyle = '#6d28d9';
+            c.beginPath(); c.ellipse(0, 0, 15, 3.2, 0, 0, Math.PI * 2); c.fill(); c.stroke();
+            c.restore();
+        } else if (accId === 'headphones') {
+            c.save();
+            c.lineWidth = lw * 2.2;
+            c.strokeStyle = '#23262b';
+            c.beginPath(); c.moveTo(25, -16); c.quadraticCurveTo(21, -46, 37, -41); c.stroke();
+            c.lineWidth = lw * 1.2;
+            c.strokeStyle = '#ef4444';
+            c.beginPath(); c.moveTo(25, -16); c.quadraticCurveTo(21, -46, 37, -41); c.stroke();
+            c.lineWidth = lw;
+            c.strokeStyle = '#23262b';
+            c.fillStyle = '#ef4444';
+            c.beginPath(); c.ellipse(25, -16, 7, 8, 0, 0, Math.PI * 2); c.fill(); c.stroke();
+            c.fillStyle = '#fecaca';
+            c.beginPath(); c.ellipse(25, -16, 3.5, 4.5, 0, 0, Math.PI * 2); c.fill();
+            c.restore();
+        } else if (accId === 'scarf') {
+            drawScarf(c, P, lw);
+        }
+    }
+
+    // הנקודה הנמוכה ביותר של כפות הרגליים אחרי הטיה, כדי "להעמיד" את הצפרדע על העלה
+    function frogLowestFootY(P) {
+        const L = frogLimbs(P);
+        const pts = [];
+        [L.hindFoot, L.frontFoot].forEach(ft => { pts.push([ft.x, ft.y]); toeTips(ft).forEach(p => pts.push(p)); });
+        L.hind.forEach(s => pts.push([s.ex, s.ey]));
+        const ca = Math.cos(P.pitch * DEG), sa = Math.sin(P.pitch * DEG);
+        let m = -1e9;
+        pts.forEach(([x, y]) => {
+            x *= P.stretch; y /= Math.sqrt(P.stretch);
+            const ry = x * sa + y * ca;
+            if (ry > m) m = ry;
+        });
+        return m;
+    }
+
+    /**
+     * ציור הצפרדע. (x, y) = הנקודה שבה כפות הרגליים נוגעות בעלה; pose = תנוחה (ראו FROG_POSES);
+     * scale = מכפיל על הגודל הרגיל במשחק. תומך בכל 5 סוגי הצפרדעים, 6 הצבעים והאביזרים.
+     */
+    function drawFrogCharacter(targetCtx, x, y, pose = FROG_POSES.sit, scale = 1, opts = {}) {
+        if (state === 'SPLASHING' && targetCtx === ctx && !opts.force) return;
+
+        const frogType = FROGS_CATALOG.find(f => f.id === (opts.frog || progress.equippedFrog)) || FROGS_CATALOG[0];
+        const colorSpec = COLORS_CATALOG.find(c => c.id === (opts.color || progress.equippedColor)) || COLORS_CATALOG[0];
+        const accId = opts.accessory || progress.equippedAccessory || 'none';
+        const S = frogStyle(colorSpec);
+
+        const P = { ...pose };
+        // נשימה עדינה בישיבה
+        if (!opts.still) P.stretch *= 1 + Math.sin(timeElapsed * 3.2) * 0.008;
+        const sc = FROG_BASE_SCALE * scale;
+        const lw = 2.6 / sc;   // קו מתאר ≈ 2.6 פיקסלים בכל גודל
+        const pxPerUnit = sc * (opts.dpr || dpr) * Math.max(P.stretch, 1);
+
+        const c = targetCtx;
+        c.save();
+        c.translate(x, y - frogLowestFootY(P) * sc);
+        c.scale(sc, sc);
+        c.rotate(P.pitch * DEG);
+        c.scale(P.stretch, 1 / Math.sqrt(P.stretch));
+        c.lineCap = 'round';
+        c.lineJoin = 'round';
+
+        drawFrogExtrasBehind(c, frogType.id, accId, P, lw);
+
+        const L = frogLimbs(P);
+        c.save();
+        c.translate(5, -3);
+        drawFrogLimb(c, L.hind, L.hindFoot, S, S.far, lw, false);
+        drawFrogLimb(c, L.front, L.frontFoot, S, S.far, lw, false);
+        c.restore();
+
+        const B = FROG_SPRITE_BOX;
+        c.drawImage(frogBodySprite(S, pxPerUnit, lw), B.x, B.y, B.w, B.h);
+
+        if (opts.blink) {
+            // מצמוץ: כל ~3.6 שניות העפעף יורד ועולה (0.2 שנ׳)
+            const k = timeElapsed % 3.6;
+            const shut = k < 0.2 ? Math.sin((k / 0.2) * Math.PI) : 0;
+            if (shut > 0.02) {
+                c.save();
+                c.translate(41, -27);
+                c.beginPath(); c.arc(0, 0, 6.6, 0, Math.PI * 2); c.clip();
+                const edge = -6.6 + 13.2 * shut;
+                c.fillStyle = S.body;
+                c.fillRect(-7, -7, 14, edge + 7);
+                c.beginPath(); c.moveTo(-6.6, edge); c.quadraticCurveTo(0, edge + 2, 6.6, edge);
+                c.lineWidth = lw; c.strokeStyle = S.ink; c.stroke();
+                c.restore();
+            }
         }
 
-        targetCtx.restore();
+        drawFrogExtrasOnBody(c, frogType.id, accId, P, lw);
+
+        drawFrogLimb(c, L.hind, L.hindFoot, S, S.body, lw, true);
+        if (accId === 'hero_cape') drawCape(c, P, '#e63946', lw);   // הגלימה מעל הגב והירך, מתחת לרגל הקדמית
+        drawFrogLimb(c, L.front, L.frontFoot, S, S.body, lw, true);
+
+        drawFrogExtrasFront(c, frogType.id, accId, P, lw);
+        c.restore();
+    }
+
+    // התנוחה הנוכחית של הצפרדע במשחק (לפי מצב: ישיבה, משיכה, קפיצה, נחיתה)
+    function currentFrogPose() {
+        const F = FROG_POSES;
+        if (state === 'JUMPING') {
+            const tUp = frog.airT;
+            // דחיפה: הרגליים מתיישרות בעשירית השנייה הראשונה
+            let p;
+            if (frog.vy < 0) {
+                const rise = 1 - Math.min(1, -frog.vy / Math.max(1, frog.vy0));
+                p = tUp < 0.1 ? lerpPose(F.crouch, F.launch, easeInOut(tUp / 0.1)) : lerpPose(F.launch, F.air, easeInOut(rise * 1.2));
+            } else {
+                // בירידה: הרגליים האחוריות מתחילות להתקפל באוויר (מעט אחרי השיא) ומסיימות רגע לפני הנחיתה
+                const fall = frog.vy / Math.max(1, frog.vy0);
+                p = lerpPose(F.air, F.land, easeInOut((fall - 0.15) / 0.65));
+            }
+            // מהירות → עוצמת ההתנופפות של בגדים רפויים (גלימה וכו')
+            p.flap = Math.min(1, Math.hypot(frog.vx, frog.vy) / 650);
+            // הגוף מצביע בערך לכיוון התעופה
+            const dir = Math.atan2(frog.vy, Math.max(1, frog.vx)) / DEG;
+            p.pitch = p.pitch * 0.45 + dir * 0.55;
+            return p;
+        }
+        if (frog.settleT > 0) {
+            // אחרי נחיתה: הרגליים כבר מקופלות — רק בלימה קטנה וחזרה לישיבה
+            const k = 1 - frog.settleT / 0.3;
+            return k < 0.4 ? lerpPose(F.land, F.crouch, easeInOut(k / 0.4)) : lerpPose(F.crouch, F.sit, easeInOut((k - 0.4) / 0.6));
+        }
+        if (state === 'AIMING' && sling && sling.armed) {
+            return lerpPose(F.sit, F.crouch, sling.ratio);
+        }
+        return F.sit;
     }
 
     function drawSplashAndPopups() {
@@ -3198,6 +3890,11 @@
 
     function renderStorePreview() {
         if (state !== 'STORE') return;
+        if (previewCanvas.width !== Math.round(190 * dpr)) {
+            previewCanvas.width = Math.round(190 * dpr);
+            previewCanvas.height = Math.round(150 * dpr);
+        }
+        previewCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
         previewCtx.clearRect(0, 0, 190, 150);
 
         // עלה חבצלת קטן בתצוגה המקדימה
@@ -3211,7 +3908,10 @@
         previewCtx.fill();
         previewCtx.stroke();
 
-        drawFrogCharacter(previewCtx, 95, 96, 1, 1, 1.55);
+        // בחנות הצפרדע יושבת בשקט — רק ממצמצת מדי פעם
+        drawFrogCharacter(previewCtx, 88, 106, FROG_POSES.sit, 1.3, {
+            frog: storePreview.frog, color: storePreview.color, accessory: storePreview.accessory || 'none', blink: true
+        });
     }
 
     function render() {
@@ -3229,12 +3929,11 @@
         } else {
             lilyPads.forEach(drawLilyPad);
             drawAimingArrow();
-            drawFrogCharacter(ctx, frog.x, frog.y, frog.squashX, frog.squashY, 1);
+            drawFrogCharacter(ctx, frog.x, frog.y + 10, currentFrogPose(), 1);
             drawSplashAndPopups();
         }
 
         ctx.restore();
-        drawSlingOverlay();
         renderStorePreview();
     }
 
